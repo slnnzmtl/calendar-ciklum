@@ -1,0 +1,55 @@
+@import '/styles/variables.scss';
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: auto;
+    height: 90vmin;
+    table-layout: fixed;
+
+
+    tr {
+
+        .row-header {
+            width: 100px;
+        }
+    }
+}
+
+table tr:first-child {
+        height: 5vh!important;
+}
+
+table td {
+    box-sizing: border-box;
+    
+    height: 10%;
+    .event-flag {
+        height: 100%;
+        width: 100%;
+        background-color: $color2;
+        box-sizing: border-box;
+        display:flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+
+        &__button {
+            background: none;
+            border: none;
+            outline: none;
+            cursor: pointer;
+        }
+    }
+}
+
+
+td, th {
+    border: 1px solid black;
+    width: 20%;
+}
+
+th {
+    font-weight: bold;
+    background-color: $color1;
+}
