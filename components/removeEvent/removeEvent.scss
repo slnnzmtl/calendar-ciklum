@@ -1,0 +1,96 @@
+/*
+* Prefixed by https://autoprefixer.github.io
+* PostCSS: v7.0.29,
+* Autoprefixer: v9.7.6
+* Browsers: last 4 version
+*/
+
+@import '/styles/variables.scss';
+
+.remove-event-wrapper {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    position: absolute;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -ms-flex-line-pack: center;
+        align-content: center;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255,255,255,0.8);
+
+    .remove-event {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        max-width: 500px;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-box-sizing: border-box;
+                box-sizing: border-box;
+        padding: 20px;
+        background-color: $color1;
+        -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);
+                box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);
+        border-radius: 5px;
+        -webkit-box-pack: center;
+            -ms-flex-pack: center;
+                justify-content: center;
+        -webkit-box-align: space-between;
+            -ms-flex-align: space-between;
+                align-items: space-between;
+
+        &__title {
+            word-wrap: break-word;
+        }
+
+        &__buttons {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-pack: end;
+                -ms-flex-pack: end;
+                    justify-content: flex-end;
+            width: 100%;
+        }
+
+        &__button {
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            margin-bottom: 10px;
+            width: 30%;
+            height: 30px;
+            margin-left: 10px;
+            -webkit-box-sizing: border-box;
+                    box-sizing: border-box;
+            cursor: pointer;
+            -webkit-transition: ease 0.1s;
+            -o-transition: ease 0.1s;
+            transition: ease 0.1s;
+            -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);
+                    box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);
+            &:hover {
+              -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);
+                      box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);
+            }
+            &:active {
+              -webkit-box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);
+                      box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);
+            }
+        }
+    }
+}
