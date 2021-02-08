@@ -486,6 +486,7 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   }, {
     key: "fillTable",
     value: function fillTable(events) {
+      console.log(events);
       var elements = this.querySelectorAll('table tr td');
       events.forEach(function (item) {
         elements.forEach(function (elem) {
@@ -687,7 +688,7 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
     value: function connectedCallback() {
       var _this = this;
 
-      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <div class=\"new-event\">\n        <Label \n          class=\"new-event__item\" \n        >Name: \n          <input autofocus\n            class=\"new-event__input\"\n            w-id=\"inputName/name\"\n          ></input>\n        </Label>\n        <Label \n          class=\"new-event__item\" \n        >Members: \n          <select \n            class=\"new-event__input\"\n            w-id=\"selectParticipant/participants\"\n            multiple\n          >\n            <option value=\"John\" selected>John</option>\n            <option value=\"Eddard\">Eddard</option>\n            <option value=\"Robbert\">Robbert</option>\n            <option value=\"Jaime\">Jaime</option>\n            <option value=\"Cersei\">Cersei</option>\n          </select>\n        </Label>\n        <Label \n          class=\"new-event__item\" \n        >Day:\n          <select \n            class=\"new-event__input\"\n            w-id=\"inputDay/day\"\n          >\n            <option value=\"Monday\" selected>Monday</option>\n            <option value=\"Tuesday\">Tuesday</option>\n            <option value=\"Wednesday\">Wednesday</option>\n            <option value=\"Thursday\">Thursday</option>\n            <option value=\"Friday\">Friday</option>\n          </select>\n        </Label>\n        <Label \n          class=\"new-event__item\" \n        >Time:\n          <select \n            class=\"new-event__input\"\n            w-id=\"inputTime/time\"\n          >\n            <option value=\"10\">10:00</option>\n            <option value=\"11\">11:00</option>\n            <option value=\"12\">12:00</option>\n            <option value=\"13\">13:00</option>\n            <option value=\"14\">14:00</option>\n            <option value=\"15\">15:00</option>\n            <option value=\"16\">16:00</option>\n            <option value=\"17\">17:00</option>\n            <option value=\"18\">18:00</option>\n          </select>\n        </Label>\n        <div class=\"new-event__button-wrapper\">\n          <button w-id=\"buttonCreate/create\" class=\"new-event__button\">Create</button>\n          <button w-id=\"buttonCancel/cancel\" class=\"new-event__button\">Cancel</button>\n        </div>\n      </div>\n    ");
+      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <div class=\"new-event\">\n        <Label \n          class=\"new-event__item\" \n        >Name: \n          <input autofocus\n            class=\"new-event__input\"\n            w-id=\"inputName/name\"\n          ></input>\n        </Label>\n        <Label \n          class=\"new-event__item\"\n        >Members:\n        <select-multiply class=\"new-event__input select-multiply\" id=\"select-participants\">\n        <template>\n          <slot name=\"John\">John</slot>\n          <slot name=\"Cercei\">Cersei</slot>\n          <slot name=\"Robert\">Robbert</slot>\n          <slot name=\"Eddard\">Eddard</slot>\n          <slot name=\"Jaime\">Jaime</slot>\n        </template>\n        </select-multiply>\n        </Label>\n        \n        <Label \n          class=\"new-event__item\" \n        >Day:\n          <select \n            class=\"new-event__input\"\n            w-id=\"inputDay/day\"\n          >\n            <option value=\"Monday\" selected>Monday</option>\n            <option value=\"Tuesday\">Tuesday</option>\n            <option value=\"Wednesday\">Wednesday</option>\n            <option value=\"Thursday\">Thursday</option>\n            <option value=\"Friday\">Friday</option>\n          </select>\n        </Label>\n        <Label \n          class=\"new-event__item\" \n        >Time:\n          <select \n            class=\"new-event__input\"\n            w-id=\"inputTime/time\"\n          >\n            <option value=\"10\">10:00</option>\n            <option value=\"11\">11:00</option>\n            <option value=\"12\">12:00</option>\n            <option value=\"13\">13:00</option>\n            <option value=\"14\">14:00</option>\n            <option value=\"15\">15:00</option>\n            <option value=\"16\">16:00</option>\n            <option value=\"17\">17:00</option>\n            <option value=\"18\">18:00</option>\n          </select>\n        </Label>\n        <div class=\"new-event__button-wrapper\">\n          <button w-id=\"buttonCreate/create\" class=\"new-event__button\">Create</button>\n          <button w-id=\"buttonCancel/cancel\" class=\"new-event__button\">Cancel</button>\n        </div>\n      </div>\n    ");
 
       this.buttonCreate.onclick = function () {
         return _this.createEvent();
@@ -697,19 +698,19 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
         return _this.cancel();
       };
 
-      window.newEvent = this;
-      new vanillaSelectBox('#selectParticipant');
+      window.newEvent = this; // new vanillaSelectBox('#selectParticipant');
     }
   }, {
     key: "createEvent",
     value: function createEvent() {
       var object = {};
       object.name = this.name;
-      object.participants = this.participants;
       object.day = this.day;
       object.time = this.time;
+      object.participants = this.querySelector('#select-participants').selectValueData.split(',');
+      console.log(object);
 
-      if (object.name !== '') {
+      if (this.checkFields(object)) {
         var cookies = _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.getCookie('calendar');
         var replaced;
         var events;
@@ -730,8 +731,29 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
 
           location.reload();
         }
-      } else {
+      }
+    }
+  }, {
+    key: "checkFields",
+    value: function checkFields(data) {
+      this.clearErrors();
+      console.log(data);
+      var error = 0;
+
+      if (data.name === '') {
         this.showError("Name cannot be empty.");
+        error = error + 1;
+      }
+
+      if (data.participants.length === 0 || data.participants[0] === 'Choose members') {
+        this.showError("Please, choose members");
+        error = error + 1;
+      }
+
+      if (error > 0) {
+        return false;
+      } else {
+        return true;
       }
     }
   }, {
@@ -761,6 +783,14 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
     key: "showError",
     value: function showError(text) {
       this.insertAdjacentHTML('afterbegin', "<span class=\"error-message\">".concat(text, "</span>"));
+    }
+  }, {
+    key: "clearErrors",
+    value: function clearErrors() {
+      var errors = this.querySelectorAll('.error-message');
+      errors.forEach(function (item) {
+        item.remove();
+      });
     }
   }, {
     key: "cancel",
@@ -874,6 +904,151 @@ customElements.define('remove-event', /*#__PURE__*/function (_HTMLElement) {
 
 /***/ }),
 
+/***/ "./components/selectComponent/selectComponent.js":
+/*!*******************************************************!*\
+  !*** ./components/selectComponent/selectComponent.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../WcMixin.js */ "./WcMixin.js");
+/* harmony import */ var _selectComponent_scss__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./selectComponent.scss */ "./components/selectComponent/selectComponent.scss");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
+
+function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+
+var items = [];
+customElements.define('select-multiply', /*#__PURE__*/function (_HTMLElement) {
+  _inherits(_class, _HTMLElement);
+
+  var _super = _createSuper(_class);
+
+  function _class() {
+    _classCallCheck(this, _class);
+
+    return _super.apply(this, arguments);
+  }
+
+  _createClass(_class, [{
+    key: "connectedCallback",
+    value: function connectedCallback() {
+      var _this2 = this;
+
+      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <p class=\"select-multiply__value\" w-id=\"selectValue/selectValueData\">".concat(items.length > 0 ? items : 'Choose members', "</p>\n      <div class=\"select-multiply__dropdown\" w-id=\"dropdownList/dropdownListValue\">\n        <p class=\"select-multiply__dropdown-item\" w-id=\"selectAll/selectAllValue\" value=\"all\">Select All</p>\n      </div>\n    "));
+      this.dropdownList.appendChild(this.getList(this));
+
+      document.querySelector('.new-event').onclick = function () {
+        return _this2.showDropDown(_this2);
+      };
+
+      this.querySelectorAll('.select-multiply__dropdown-item').forEach(function (elem) {
+        elem.onclick = function () {
+          return _this2.choose(elem);
+        };
+      });
+    }
+  }, {
+    key: "getList",
+    value: function getList(_this) {
+      var template = _this.querySelector('template');
+
+      var slots = Array.from(template.content.children);
+      var list = document.createDocumentFragment();
+      slots.forEach(function (slot, index) {
+        var elem = document.createElement('p');
+        elem.innerHTML = slot.innerHTML;
+        elem.setAttribute('name', slot.name);
+        elem.setAttribute('value', slot.innerHTML);
+        elem.className = _this.tagName.toLowerCase() + '__dropdown-item';
+        list.appendChild(elem);
+      });
+      template.remove();
+      return list;
+    }
+  }, {
+    key: "choose",
+    value: function choose(elem) {
+      var value = elem.getAttribute('value');
+
+      if (value !== 'all') {
+        if (!elem.classList.contains('selected')) {
+          elem.classList.add('selected');
+          items.push(value);
+        } else {
+          elem.classList.remove('selected');
+          this.selectAll.classList.remove('selected');
+          items.forEach(function (item, index) {
+            if (item === value) {
+              items.splice(index, 1);
+            }
+          });
+        }
+      } else {
+        var all = Array.from(elem.parentNode.children);
+
+        if (!elem.classList.contains('selected')) {
+          items = [];
+          all.forEach(function (item, index) {
+            if (index > 0) {
+              items.push(item.getAttribute('value'));
+            }
+
+            item.classList.add('selected');
+          });
+        } else {
+          all.forEach(function (item) {
+            item.classList.remove('selected');
+          });
+          items = [];
+        }
+      }
+
+      this.selectValueData = items;
+    }
+  }, {
+    key: "showDropDown",
+    value: function showDropDown(elem) {
+      var classList = event.target.classList;
+
+      if (classList.contains('select-multiply') || classList.contains('select-multiply__dropdown-item')) {
+        elem.classList.add('open');
+      } else {
+        elem.classList.remove('open');
+      }
+    }
+  }]);
+
+  return _class;
+}( /*#__PURE__*/_wrapNativeSuper(HTMLElement)));
+
+/***/ }),
+
 /***/ "./main.js":
 /*!*****************!*\
   !*** ./main.js ***!
@@ -885,7 +1060,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_calendarHeader_calendarHeader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../components/calendarHeader/calendarHeader.js */ "./components/calendarHeader/calendarHeader.js");
 /* harmony import */ var _components_newEvent_newEvent_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../components/newEvent/newEvent.js */ "./components/newEvent/newEvent.js");
 /* harmony import */ var _components_removeEvent_removeEvent_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../components/removeEvent/removeEvent.js */ "./components/removeEvent/removeEvent.js");
-/* harmony import */ var _styles_main_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../styles/main.scss */ "./styles/main.scss");
+/* harmony import */ var _components_selectComponent_selectComponent_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../components/selectComponent/selectComponent.js */ "./components/selectComponent/selectComponent.js");
+/* harmony import */ var _styles_main_scss__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../styles/main.scss */ "./styles/main.scss");
+
 
 
 
@@ -958,10 +1135,8 @@ function onDrop(event) {
 }
 
 function putElement(element, dropzone) {
-  // let elem = {};
   var drop = {};
-  var events = _cookies_js__WEBPACK_IMPORTED_MODULE_0__.getEvents(); // elem = element.querySelector('.event-flag__button');
-
+  var events = _cookies_js__WEBPACK_IMPORTED_MODULE_0__.getEvents();
   element.day = element.getAttribute('day');
   element.time = element.getAttribute('time');
   drop.day = dropzone.getAttribute('day');
@@ -1026,7 +1201,7 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_cssWithMappingToString_js__WEBPACK_IMPORTED_MODULE_0___default()));
 ___CSS_LOADER_EXPORT___.push([module.id, "@import url(https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap);"]);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "table {\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  border-collapse: collapse;\n  width: 100%;\n  margin: auto;\n  height: 90vmin;\n  table-layout: fixed;\n}\ntable tr .row-header {\n  width: 100px;\n}\n\ntable tr:first-child {\n  height: 5vh !important;\n}\n\ntable td {\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  height: 10%;\n  padding: 0;\n  margin: 0;\n}\ntable td .event-flag {\n  cursor: move;\n  cursor: grab;\n  cursor: -webkit-grab;\n  height: 100%;\n  width: 100%;\n  background-color: #f7f6e7;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n  -ms-flex-pack: justify;\n  justify-content: space-between;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n  padding: 10px;\n}\ntable td .event-flag__name {\n  word-wrap: break-word;\n  width: 90%;\n}\ntable td .event-flag:active {\n  cursor: grabbing;\n  cursor: -webkit-grabbing;\n}\ntable td .event-flag__button {\n  background: none;\n  border: none;\n  outline: none;\n  cursor: pointer;\n}\n\ntd, th {\n  border: 2px solid #B9CBC3;\n  width: 20%;\n}\n\nth {\n  font-weight: bold;\n  background-color: #B9CBC3;\n  font-family: \"Lora\", serif;\n}", "",{"version":3,"sources":["webpack://./components/calendarComponent/calendarComponent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAEA;EACE,sDAAA;EACQ,8CAAA;EACR,yBAAA;EACA,WAAA;EACA,YAAA;EACA,cAAA;EACA,mBAAA;AAAF;AAGI;EACI,YAAA;AADR;;AAMA;EACE,sBAAA;AAHF;;AAMA;EACE,8BAAA;EACQ,sBAAA;EACR,WAAA;EACA,UAAA;EACA,SAAA;AAHF;AAKE;EACE,YAAA;EACA,YAAA;EACA,oBAAA;EAEA,YAAA;EACA,WAAA;EACA,yBCjCK;EDkCL,8BAAA;EACQ,sBAAA;EACR,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,yBAAA;EACI,sBAAA;EACI,8BAAA;EACR,yBAAA;EACI,sBAAA;EACI,mBAAA;EACR,aAAA;AAJJ;AAMI;EACE,qBAAA;EACA,UAAA;AAJN;AAOI;EACE,gBAAA;EACA,wBAAA;AALN;AAQI;EACE,gBAAA;EACA,YAAA;EACA,aAAA;EACA,eAAA;AANN;;AAYA;EACE,yBAAA;EACA,UAAA;AATF;;AAYA;EACE,iBAAA;EACA,yBC3EO;ED4EP,0BCxEM;AD+DR","sourcesContent":["@import '/styles/variables.scss';\r\n\r\ntable {\r\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n          box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n  border-collapse: collapse;\r\n  width: 100%;\r\n  margin: auto;\r\n  height: 90vmin;\r\n  table-layout: fixed;\r\n\r\n  tr {\r\n    .row-header {\r\n        width: 100px;\r\n    }\r\n  }\r\n}\r\n\r\ntable tr:first-child {\r\n  height: 5vh!important;\r\n}\r\n\r\ntable td {\r\n  -webkit-box-sizing: border-box;\r\n          box-sizing: border-box;\r\n  height: 10%;\r\n  padding: 0;\r\n  margin: 0;\r\n\r\n  .event-flag {\r\n    cursor: move;\r\n    cursor: grab;\r\n    cursor: -webkit-grab;\r\n\r\n    height: 100%;\r\n    width: 100%;\r\n    background-color: $color2;\r\n    -webkit-box-sizing: border-box;\r\n            box-sizing: border-box;\r\n    display:-webkit-box;\r\n    display:-ms-flexbox;\r\n    display:flex;\r\n    -webkit-box-pack: justify;\r\n        -ms-flex-pack: justify;\r\n            justify-content: space-between;\r\n    -webkit-box-align: center;\r\n        -ms-flex-align: center;\r\n            align-items: center;\r\n    padding: 10px;\r\n\r\n    &__name {\r\n      word-wrap: break-word;\r\n      width: 90%;\r\n    }\r\n\r\n    &:active {\r\n      cursor: grabbing;\r\n      cursor: -webkit-grabbing;\r\n    }\r\n\r\n    &__button {\r\n      background: none;\r\n      border: none;\r\n      outline: none;\r\n      cursor: pointer;\r\n    }\r\n  }\r\n}\r\n\r\n\r\ntd, th {\r\n  border: 2px solid $color1;\r\n  width: 20%;\r\n}\r\n\r\nth {\r\n  font-weight: bold;\r\n  background-color: $color1;\r\n  font-family: $font1;\r\n}","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, "table {\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  border-collapse: collapse;\n  width: 100%;\n  margin: auto;\n  height: 90vmin;\n  table-layout: fixed;\n}\ntable tr .row-header {\n  width: 5%;\n}\n@media (max-width: 900px) {\n  table tr .row-header {\n    width: 10%;\n  }\n}\n\ntable tr:first-child {\n  height: 5vh !important;\n}\n\ntable td {\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  height: 10%;\n  padding: 0;\n  margin: 0;\n}\ntable td .event-flag {\n  cursor: move;\n  cursor: grab;\n  cursor: -webkit-grab;\n  height: 100%;\n  width: 100%;\n  background-color: #f7f6e7;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n  -ms-flex-pack: justify;\n  justify-content: space-between;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n  padding: 10px;\n}\ntable td .event-flag__name {\n  word-wrap: break-word;\n  width: 90%;\n}\ntable td .event-flag:active {\n  cursor: grabbing;\n  cursor: -webkit-grabbing;\n}\ntable td .event-flag__button {\n  background: none;\n  border: none;\n  outline: none;\n  cursor: pointer;\n}\n\ntd, th {\n  border: 2px solid #B9CBC3;\n}\n@media (max-width: 700px) {\n  td, th {\n    font-size: 12px;\n  }\n}\n@media (max-width: 400px) {\n  td, th {\n    font-size: 10px;\n  }\n}\n\nth {\n  font-weight: bold;\n  background-color: #B9CBC3;\n  font-family: \"Lora\", serif;\n}", "",{"version":3,"sources":["webpack://./components/calendarComponent/calendarComponent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAEA;EACE,sDAAA;EACQ,8CAAA;EACR,yBAAA;EACA,WAAA;EACA,YAAA;EACA,cAAA;EACA,mBAAA;AAAF;AAGI;EACI,SAAA;AADR;AAEQ;EAFJ;IAGM,UAAA;EACR;AACF;;AAIA;EACE,sBAAA;AADF;;AAIA;EACE,8BAAA;EACQ,sBAAA;EACR,WAAA;EACA,UAAA;EACA,SAAA;AADF;AAGE;EACE,YAAA;EACA,YAAA;EACA,oBAAA;EAEA,YAAA;EACA,WAAA;EACA,yBCpCK;EDqCL,8BAAA;EACQ,sBAAA;EACR,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,yBAAA;EACI,sBAAA;EACI,8BAAA;EACR,yBAAA;EACI,sBAAA;EACI,mBAAA;EACR,aAAA;AAFJ;AAII;EACE,qBAAA;EACA,UAAA;AAFN;AAKI;EACE,gBAAA;EACA,wBAAA;AAHN;AAMI;EACE,gBAAA;EACA,YAAA;EACA,aAAA;EACA,eAAA;AAJN;;AAUA;EACE,yBAAA;AAPF;AAQE;EAFF;IAGI,eAAA;EALF;AACF;AAME;EALF;IAMI,eAAA;EAHF;AACF;;AAMA;EACE,iBAAA;EACA,yBCnFO;EDoFP,0BChFM;AD6ER","sourcesContent":["@import '/styles/variables.scss';\r\n\r\ntable {\r\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n          box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n  border-collapse: collapse;\r\n  width: 100%;\r\n  margin: auto;\r\n  height: 90vmin;\r\n  table-layout: fixed;\r\n\r\n  tr {\r\n    .row-header {\r\n        width: 5%;\r\n        @media (max-width: 900px) {\r\n          width: 10%;\r\n        }\r\n    }\r\n  }\r\n}\r\n\r\ntable tr:first-child {\r\n  height: 5vh!important;\r\n}\r\n\r\ntable td {\r\n  -webkit-box-sizing: border-box;\r\n          box-sizing: border-box;\r\n  height: 10%;\r\n  padding: 0;\r\n  margin: 0;\r\n\r\n  .event-flag {\r\n    cursor: move;\r\n    cursor: grab;\r\n    cursor: -webkit-grab;\r\n\r\n    height: 100%;\r\n    width: 100%;\r\n    background-color: $color2;\r\n    -webkit-box-sizing: border-box;\r\n            box-sizing: border-box;\r\n    display:-webkit-box;\r\n    display:-ms-flexbox;\r\n    display:flex;\r\n    -webkit-box-pack: justify;\r\n        -ms-flex-pack: justify;\r\n            justify-content: space-between;\r\n    -webkit-box-align: center;\r\n        -ms-flex-align: center;\r\n            align-items: center;\r\n    padding: 10px;\r\n\r\n    &__name {\r\n      word-wrap: break-word;\r\n      width: 90%;\r\n    }\r\n\r\n    &:active {\r\n      cursor: grabbing;\r\n      cursor: -webkit-grabbing;\r\n    }\r\n\r\n    &__button {\r\n      background: none;\r\n      border: none;\r\n      outline: none;\r\n      cursor: pointer;\r\n    }\r\n  }\r\n}\r\n\r\n\r\ntd, th {\r\n  border: 2px solid $color1;\r\n  @media (max-width: 700px) {\r\n    font-size: 12px;\r\n  }\r\n  @media (max-width: 400px) {\r\n    font-size: 10px;\r\n  }\r\n}\r\n\r\nth {\r\n  font-weight: bold;\r\n  background-color: $color1;\r\n  font-family: $font1;\r\n}","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -1080,7 +1255,7 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_cssWithMappingToString_js__WEBPACK_IMPORTED_MODULE_0___default()));
 ___CSS_LOADER_EXPORT___.push([module.id, "@import url(https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap);"]);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "/*\n* Prefixed by https://autoprefixer.github.io\n* PostCSS: v7.0.29,\n* Autoprefixer: v9.7.6\n* Browsers: last 4 version\n*/\n.new-event-container {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -ms-flex-direction: column;\n  flex-direction: column;\n  position: absolute;\n  -webkit-box-pack: center;\n  -ms-flex-pack: center;\n  justify-content: center;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n  -ms-flex-line-pack: center;\n  align-content: center;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(255, 255, 255, 0.8);\n}\n.new-event-container .error-message {\n  background-color: #fff;\n  border: 2px solid #ff5d5d;\n  border-radius: 5px;\n  color: #ff5d5d;\n  width: 500px;\n  height: 3em;\n  text-align: center;\n  line-height: 3em;\n  margin-bottom: 10px;\n}\n.new-event-container .new-event {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -ms-flex-direction: column;\n  flex-direction: column;\n  width: 500px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  padding: 40px;\n  background-color: #B9CBC3;\n  border-radius: 5px;\n  -webkit-box-pack: center;\n  -ms-flex-pack: center;\n  justify-content: center;\n  -webkit-box-align: space-between;\n  -ms-flex-align: space-between;\n  align-items: space-between;\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}\n.new-event-container .new-event .vsb-main {\n  width: 75%;\n  border-radius: 5px;\n  -ms-flex-item-align: center;\n  -ms-grid-row-align: center;\n  align-self: center;\n  border: none;\n}\n.new-event-container .new-event .vsb-main button {\n  border-radius: 5px !important;\n  border: none !important;\n  -webkit-box-shadow: none;\n  box-shadow: none;\n  outline: none;\n}\n.new-event-container .new-event .vsb-menu {\n  width: 100% !important;\n}\n.new-event-container .new-event__item {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n  -ms-flex-pack: justify;\n  justify-content: space-between;\n  -ms-flex-line-pack: center;\n  align-content: center;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n  height: 45px;\n  font-size: 15px;\n}\n.new-event-container .new-event__input {\n  width: 75%;\n  height: 30px;\n  border-radius: 5px;\n  border: none;\n  padding-left: 10px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  outline: none;\n}\n.new-event-container .new-event__input:focus {\n  -webkit-box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}\n.new-event-container .new-event__button-wrapper {\n  margin-top: 20px;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: end;\n  -ms-flex-pack: end;\n  justify-content: flex-end;\n  width: 100%;\n}\n.new-event-container .new-event__button {\n  border-radius: 5px;\n  border: none;\n  outline: none;\n  margin-bottom: 10px;\n  width: 30%;\n  height: 30px;\n  margin-left: 10px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  cursor: pointer;\n  -webkit-transition: ease 0.1s;\n  -o-transition: ease 0.1s;\n  transition: ease 0.1s;\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}\n.new-event-container .new-event__button:hover {\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n}\n.new-event-container .new-event__button:active {\n  -webkit-box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}", "",{"version":3,"sources":["webpack://./components/newEvent/newEvent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAAA;;;;;CAAA;AASA;EACE,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,4BAAA;EACA,6BAAA;EACI,0BAAA;EACI,sBAAA;EACR,kBAAA;EACA,wBAAA;EACI,qBAAA;EACI,uBAAA;EACR,yBAAA;EACI,sBAAA;EACI,mBAAA;EACR,0BAAA;EACI,qBAAA;EACJ,OAAA;EACA,MAAA;EACA,WAAA;EACA,YAAA;EACA,0CAAA;AADF;AAGE;EACE,sBAAA;EACA,yBAAA;EACA,kBAAA;EACA,cAAA;EACA,YAAA;EACA,WAAA;EACA,kBAAA;EACA,gBAAA;EACA,mBAAA;AADJ;AAKE;EACE,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,4BAAA;EACA,6BAAA;EACI,0BAAA;EACI,sBAAA;EACR,YAAA;EACA,8BAAA;EACQ,sBAAA;EACR,aAAA;EACA,yBCvDK;EDwDL,kBAAA;EACA,wBAAA;EACI,qBAAA;EACI,uBAAA;EACR,gCAAA;EACI,6BAAA;EACI,0BAAA;EACR,sDAAA;EACQ,8CAAA;AAHZ;AAKI;EACE,UAAA;EACA,kBAAA;EACA,2BAAA;EACI,0BAAA;EACA,kBAAA;EACJ,YAAA;AAHN;AAIM;EACE,6BAAA;EACA,uBAAA;EACA,wBAAA;EACQ,gBAAA;EACR,aAAA;AAFR;AAMI;EACE,sBAAA;AAJN;AAOI;EACE,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,yBAAA;EACI,sBAAA;EACI,8BAAA;EACR,0BAAA;EACI,qBAAA;EACJ,yBAAA;EACI,sBAAA;EACI,mBAAA;EACR,YAAA;EACA,eAAA;AALN;AAQI;EACI,UAAA;EACA,YAAA;EACA,kBAAA;EACA,YAAA;EACA,kBAAA;EACA,8BAAA;EACQ,sBAAA;EACR,aAAA;AANR;AAOQ;EACE,4DAAA;EACQ,oDAAA;AALlB;AASI;EACE,gBAAA;EACA,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,qBAAA;EACI,kBAAA;EACI,yBAAA;EACR,WAAA;AAPN;AAUI;EACE,kBAAA;EACA,YAAA;EACA,aAAA;EACA,mBAAA;EACA,UAAA;EACA,YAAA;EACA,iBAAA;EACA,8BAAA;EACQ,sBAAA;EACR,eAAA;EACA,6BAAA;EACA,wBAAA;EACA,qBAAA;EACA,sDAAA;EACQ,8CAAA;AARd;AASM;EACE,sDAAA;EACQ,8CAAA;AAPhB;AASM;EACE,4DAAA;EACQ,oDAAA;AAPhB","sourcesContent":["/*\r\n* Prefixed by https://autoprefixer.github.io\r\n* PostCSS: v7.0.29,\r\n* Autoprefixer: v9.7.6\r\n* Browsers: last 4 version\r\n*/\r\n\r\n@import '/styles/variables.scss';\r\n\r\n.new-event-container {\r\n  display: -webkit-box;\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -webkit-box-orient: vertical;\r\n  -webkit-box-direction: normal;\r\n      -ms-flex-direction: column;\r\n          flex-direction: column;\r\n  position: absolute;\r\n  -webkit-box-pack: center;\r\n      -ms-flex-pack: center;\r\n          justify-content: center;\r\n  -webkit-box-align: center;\r\n      -ms-flex-align: center;\r\n          align-items: center;\r\n  -ms-flex-line-pack: center;\r\n      align-content: center;\r\n  left: 0;\r\n  top: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  background-color: rgba(255,255,255,0.8);\r\n\r\n  .error-message {\r\n    background-color: #fff;\r\n    border: 2px solid rgb(255, 93, 93);\r\n    border-radius: 5px;\r\n    color: rgb(255, 93, 93);\r\n    width: 500px;\r\n    height: 3em;\r\n    text-align: center;\r\n    line-height: 3em;\r\n    margin-bottom: 10px;\r\n  }\r\n    \r\n\r\n  .new-event {\r\n    display: -webkit-box;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -webkit-box-orient: vertical;\r\n    -webkit-box-direction: normal;\r\n        -ms-flex-direction: column;\r\n            flex-direction: column;\r\n    width: 500px;\r\n    -webkit-box-sizing: border-box;\r\n            box-sizing: border-box;\r\n    padding: 40px;\r\n    background-color: $color1;\r\n    border-radius: 5px;\r\n    -webkit-box-pack: center;\r\n        -ms-flex-pack: center;\r\n            justify-content: center;\r\n    -webkit-box-align: space-between;\r\n        -ms-flex-align: space-between;\r\n            align-items: space-between;\r\n    -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n            box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n\r\n    .vsb-main {\r\n      width: 75%;\r\n      border-radius: 5px;\r\n      -ms-flex-item-align: center;\r\n          -ms-grid-row-align: center;\r\n          align-self: center;\r\n      border: none;\r\n      button {\r\n        border-radius: 5px!important;\r\n        border: none!important;\r\n        -webkit-box-shadow: none;\r\n                box-shadow: none;\r\n        outline: none;\r\n      }\r\n    }\r\n\r\n    .vsb-menu {\r\n      width: 100%!important;\r\n    }\r\n\r\n    &__item {\r\n      display: -webkit-box;\r\n      display: -ms-flexbox;\r\n      display: flex;\r\n      -webkit-box-pack: justify;\r\n          -ms-flex-pack: justify;\r\n              justify-content: space-between;\r\n      -ms-flex-line-pack: center;\r\n          align-content: center;\r\n      -webkit-box-align: center;\r\n          -ms-flex-align: center;\r\n              align-items: center;\r\n      height: 45px;\r\n      font-size: 15px;\r\n    }\r\n\r\n    &__input {\r\n        width: 75%;\r\n        height: 30px;\r\n        border-radius: 5px;\r\n        border: none; \r\n        padding-left: 10px;\r\n        -webkit-box-sizing: border-box;\r\n                box-sizing: border-box;\r\n        outline: none;\r\n        &:focus {\r\n          -webkit-box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n                  box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n        }\r\n    }\r\n\r\n    &__button-wrapper {\r\n      margin-top: 20px;\r\n      display: -webkit-box;\r\n      display: -ms-flexbox;\r\n      display: flex;\r\n      -webkit-box-pack: end;\r\n          -ms-flex-pack: end;\r\n              justify-content: flex-end;\r\n      width: 100%;\r\n    }\r\n\r\n    &__button {\r\n      border-radius: 5px;\r\n      border: none;\r\n      outline: none;\r\n      margin-bottom: 10px;\r\n      width: 30%;\r\n      height: 30px;\r\n      margin-left: 10px;\r\n      -webkit-box-sizing: border-box;\r\n              box-sizing: border-box;\r\n      cursor: pointer;\r\n      -webkit-transition: ease 0.1s;\r\n      -o-transition: ease 0.1s;\r\n      transition: ease 0.1s;\r\n      -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n              box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n      &:hover {\r\n        -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n                box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n      }\r\n      &:active {\r\n        -webkit-box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n                box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n      }\r\n    }\r\n  }\r\n}","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, "/*\n* Prefixed by https://autoprefixer.github.io\n* PostCSS: v7.0.29,\n* Autoprefixer: v9.7.6\n* Browsers: last 4 version\n*/\n.new-event-container {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -ms-flex-direction: column;\n  flex-direction: column;\n  position: absolute;\n  -webkit-box-pack: center;\n  -ms-flex-pack: center;\n  justify-content: center;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n  -ms-flex-line-pack: center;\n  align-content: center;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(255, 255, 255, 0.8);\n}\n.new-event-container .error-message {\n  background-color: #fff;\n  border: 2px solid #ff5d5d;\n  border-radius: 5px;\n  color: #ff5d5d;\n  width: 500px;\n  height: 3em;\n  text-align: center;\n  line-height: 3em;\n  margin-bottom: 10px;\n}\n@media (max-width: 500px) {\n  .new-event-container .error-message {\n    width: 90vw;\n  }\n}\n.new-event-container .new-event {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -ms-flex-direction: column;\n  flex-direction: column;\n  width: 500px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  padding: 40px;\n  background-color: #B9CBC3;\n  border-radius: 5px;\n  -webkit-box-pack: center;\n  -ms-flex-pack: center;\n  justify-content: center;\n  -webkit-box-align: space-between;\n  -ms-flex-align: space-between;\n  align-items: space-between;\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}\n@media (max-width: 500px) {\n  .new-event-container .new-event {\n    width: 90vw;\n  }\n}\n.new-event-container .new-event__item {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n  -ms-flex-pack: justify;\n  justify-content: space-between;\n  -ms-flex-line-pack: center;\n  align-content: center;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n  min-height: 55px;\n  font-size: 15px;\n}\n@media (max-width: 500px) {\n  .new-event-container .new-event__item {\n    flex-direction: column;\n    align-items: flex-start;\n    margin-bottom: 10px;\n  }\n}\n.new-event-container .new-event__input {\n  font-size: 13px;\n  background-color: #fff;\n  width: 75%;\n  height: 35px;\n  border-radius: 5px;\n  border: none;\n  padding-left: 10px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  outline: none;\n}\n@media (max-width: 500px) {\n  .new-event-container .new-event__input {\n    width: 100%;\n    margin-top: 10px;\n  }\n}\n.new-event-container .new-event__input:focus {\n  -webkit-box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}\n.new-event-container .new-event__button-wrapper {\n  margin-top: 20px;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: end;\n  -ms-flex-pack: end;\n  justify-content: flex-end;\n  width: 100%;\n}\n.new-event-container .new-event__button {\n  border-radius: 5px;\n  border: none;\n  outline: none;\n  margin-bottom: 10px;\n  width: 30%;\n  height: 30px;\n  margin-left: 10px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  cursor: pointer;\n  -webkit-transition: ease 0.1s;\n  -o-transition: ease 0.1s;\n  transition: ease 0.1s;\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}\n.new-event-container .new-event__button:hover {\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n}\n.new-event-container .new-event__button:active {\n  -webkit-box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}", "",{"version":3,"sources":["webpack://./components/newEvent/newEvent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAAA;;;;;CAAA;AASA;EACE,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,4BAAA;EACA,6BAAA;EACI,0BAAA;EACI,sBAAA;EACR,kBAAA;EACA,wBAAA;EACI,qBAAA;EACI,uBAAA;EACR,yBAAA;EACI,sBAAA;EACI,mBAAA;EACR,0BAAA;EACI,qBAAA;EACJ,OAAA;EACA,MAAA;EACA,WAAA;EACA,YAAA;EACA,0CAAA;AADF;AAGE;EACE,sBAAA;EACA,yBAAA;EACA,kBAAA;EACA,cAAA;EACA,YAAA;EAIA,WAAA;EACA,kBAAA;EACA,gBAAA;EACA,mBAAA;AAJJ;AAFI;EANF;IAOI,WAAA;EAKJ;AACF;AAGE;EACE,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,4BAAA;EACA,6BAAA;EACI,0BAAA;EACI,sBAAA;EACR,YAAA;EAIA,8BAAA;EACQ,sBAAA;EACR,aAAA;EACA,yBC7DK;ED8DL,kBAAA;EACA,wBAAA;EACI,qBAAA;EACI,uBAAA;EACR,gCAAA;EACI,6BAAA;EACI,0BAAA;EACR,sDAAA;EACQ,8CAAA;AAJZ;AAXI;EATF;IAUI,WAAA;EAcJ;AACF;AAEI;EACE,oBAAA;EACA,oBAAA;EACA,aAAA;EAOA,yBAAA;EACI,sBAAA;EACI,8BAAA;EACR,0BAAA;EACI,qBAAA;EACJ,yBAAA;EACI,sBAAA;EACI,mBAAA;EACR,gBAAA;EACA,eAAA;AANN;AARM;EALF;IAMI,sBAAA;IACA,uBAAA;IACA,mBAAA;EAWN;AACF;AAEI;EACI,eAAA;EACA,sBAAA;EACA,UAAA;EAKA,YAAA;EACA,kBAAA;EACA,YAAA;EACA,kBAAA;EACA,8BAAA;EACQ,sBAAA;EACR,aAAA;AAJR;AANQ;EAJJ;IAKM,WAAA;IACA,gBAAA;EASR;AACF;AADQ;EACE,4DAAA;EACQ,oDAAA;AAGlB;AACI;EACE,gBAAA;EACA,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,qBAAA;EACI,kBAAA;EACI,yBAAA;EACR,WAAA;AACN;AAEI;EACE,kBAAA;EACA,YAAA;EACA,aAAA;EACA,mBAAA;EACA,UAAA;EACA,YAAA;EACA,iBAAA;EACA,8BAAA;EACQ,sBAAA;EACR,eAAA;EACA,6BAAA;EACA,wBAAA;EACA,qBAAA;EACA,sDAAA;EACQ,8CAAA;AAAd;AACM;EACE,sDAAA;EACQ,8CAAA;AAChB;AACM;EACE,4DAAA;EACQ,oDAAA;AAChB","sourcesContent":["/*\r\n* Prefixed by https://autoprefixer.github.io\r\n* PostCSS: v7.0.29,\r\n* Autoprefixer: v9.7.6\r\n* Browsers: last 4 version\r\n*/\r\n\r\n@import '/styles/variables.scss';\r\n\r\n.new-event-container {\r\n  display: -webkit-box;\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -webkit-box-orient: vertical;\r\n  -webkit-box-direction: normal;\r\n      -ms-flex-direction: column;\r\n          flex-direction: column;\r\n  position: absolute;\r\n  -webkit-box-pack: center;\r\n      -ms-flex-pack: center;\r\n          justify-content: center;\r\n  -webkit-box-align: center;\r\n      -ms-flex-align: center;\r\n          align-items: center;\r\n  -ms-flex-line-pack: center;\r\n      align-content: center;\r\n  left: 0;\r\n  top: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  background-color: rgba(255,255,255,0.8);\r\n\r\n  .error-message {\r\n    background-color: #fff;\r\n    border: 2px solid rgb(255, 93, 93);\r\n    border-radius: 5px;\r\n    color: rgb(255, 93, 93);\r\n    width: 500px;\r\n    @media (max-width: 500px) {\r\n      width: 90vw;\r\n    }\r\n    height: 3em;\r\n    text-align: center;\r\n    line-height: 3em;\r\n    margin-bottom: 10px;\r\n  }\r\n    \r\n\r\n  .new-event {\r\n    display: -webkit-box;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -webkit-box-orient: vertical;\r\n    -webkit-box-direction: normal;\r\n        -ms-flex-direction: column;\r\n            flex-direction: column;\r\n    width: 500px;\r\n    @media (max-width: 500px) {\r\n      width: 90vw;\r\n    }\r\n    -webkit-box-sizing: border-box;\r\n            box-sizing: border-box;\r\n    padding: 40px;\r\n    background-color: $color1;\r\n    border-radius: 5px;\r\n    -webkit-box-pack: center;\r\n        -ms-flex-pack: center;\r\n            justify-content: center;\r\n    -webkit-box-align: space-between;\r\n        -ms-flex-align: space-between;\r\n            align-items: space-between;\r\n    -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n            box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n\r\n    \r\n    &__item {\r\n      display: -webkit-box;\r\n      display: -ms-flexbox;\r\n      display: flex;\r\n\r\n      @media (max-width: 500px) {\r\n        flex-direction: column;\r\n        align-items: flex-start;\r\n        margin-bottom: 10px;    \r\n      }\r\n      -webkit-box-pack: justify;\r\n          -ms-flex-pack: justify;\r\n              justify-content: space-between;\r\n      -ms-flex-line-pack: center;\r\n          align-content: center;\r\n      -webkit-box-align: center;\r\n          -ms-flex-align: center;\r\n              align-items: center;\r\n      min-height: 55px;\r\n      font-size: 15px;\r\n    }\r\n\r\n    &__input {\r\n        font-size: 13px;\r\n        background-color: #fff;\r\n        width: 75%;\r\n        @media (max-width: 500px) {\r\n          width: 100%;\r\n          margin-top: 10px;  \r\n        }\r\n        height: 35px;\r\n        border-radius: 5px;\r\n        border: none; \r\n        padding-left: 10px;\r\n        -webkit-box-sizing: border-box;\r\n                box-sizing: border-box;\r\n        outline: none;\r\n        &:focus {\r\n          -webkit-box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n                  box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n        }\r\n    }\r\n\r\n    &__button-wrapper {\r\n      margin-top: 20px;\r\n      display: -webkit-box;\r\n      display: -ms-flexbox;\r\n      display: flex;\r\n      -webkit-box-pack: end;\r\n          -ms-flex-pack: end;\r\n              justify-content: flex-end;\r\n      width: 100%;\r\n    }\r\n\r\n    &__button {\r\n      border-radius: 5px;\r\n      border: none;\r\n      outline: none;\r\n      margin-bottom: 10px;\r\n      width: 30%;\r\n      height: 30px;\r\n      margin-left: 10px;\r\n      -webkit-box-sizing: border-box;\r\n              box-sizing: border-box;\r\n      cursor: pointer;\r\n      -webkit-transition: ease 0.1s;\r\n      -o-transition: ease 0.1s;\r\n      transition: ease 0.1s;\r\n      -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n              box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n      &:hover {\r\n        -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n                box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n      }\r\n      &:active {\r\n        -webkit-box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n                box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n      }\r\n    }\r\n  }\r\n}","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -1108,6 +1283,39 @@ var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBP
 ___CSS_LOADER_EXPORT___.push([module.id, "@import url(https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap);"]);
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, "/*\n* Prefixed by https://autoprefixer.github.io\n* PostCSS: v7.0.29,\n* Autoprefixer: v9.7.6\n* Browsers: last 4 version\n*/\n.remove-event-wrapper {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -ms-flex-direction: column;\n  flex-direction: column;\n  position: absolute;\n  -webkit-box-pack: center;\n  -ms-flex-pack: center;\n  justify-content: center;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n  -ms-flex-line-pack: center;\n  align-content: center;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(255, 255, 255, 0.8);\n}\n.remove-event-wrapper .remove-event {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  max-width: 500px;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -ms-flex-direction: column;\n  flex-direction: column;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  padding: 20px;\n  background-color: #B9CBC3;\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  border-radius: 5px;\n  -webkit-box-pack: center;\n  -ms-flex-pack: center;\n  justify-content: center;\n  -webkit-box-align: space-between;\n  -ms-flex-align: space-between;\n  align-items: space-between;\n}\n.remove-event-wrapper .remove-event__title {\n  word-wrap: break-word;\n}\n.remove-event-wrapper .remove-event__buttons {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: end;\n  -ms-flex-pack: end;\n  justify-content: flex-end;\n  width: 100%;\n}\n.remove-event-wrapper .remove-event__button {\n  border-radius: 5px;\n  border: none;\n  outline: none;\n  margin-bottom: 10px;\n  width: 30%;\n  height: 30px;\n  margin-left: 10px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  cursor: pointer;\n  -webkit-transition: ease 0.1s;\n  -o-transition: ease 0.1s;\n  transition: ease 0.1s;\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}\n.remove-event-wrapper .remove-event__button:hover {\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n}\n.remove-event-wrapper .remove-event__button:active {\n  -webkit-box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}", "",{"version":3,"sources":["webpack://./components/removeEvent/removeEvent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAAA;;;;;CAAA;AASA;EACI,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,4BAAA;EACA,6BAAA;EACI,0BAAA;EACI,sBAAA;EACR,kBAAA;EACA,wBAAA;EACI,qBAAA;EACI,uBAAA;EACR,yBAAA;EACI,sBAAA;EACI,mBAAA;EACR,0BAAA;EACI,qBAAA;EACJ,OAAA;EACA,MAAA;EACA,WAAA;EACA,YAAA;EACA,0CAAA;AADJ;AAGI;EACI,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,gBAAA;EACA,4BAAA;EACA,6BAAA;EACI,0BAAA;EACI,sBAAA;EACR,8BAAA;EACQ,sBAAA;EACR,aAAA;EACA,yBC1CC;ED2CD,sDAAA;EACQ,8CAAA;EACR,kBAAA;EACA,wBAAA;EACI,qBAAA;EACI,uBAAA;EACR,gCAAA;EACI,6BAAA;EACI,0BAAA;AADhB;AAGQ;EACI,qBAAA;AADZ;AAIQ;EACI,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,qBAAA;EACI,kBAAA;EACI,yBAAA;EACR,WAAA;AAFZ;AAKQ;EACI,kBAAA;EACA,YAAA;EACA,aAAA;EACA,mBAAA;EACA,UAAA;EACA,YAAA;EACA,iBAAA;EACA,8BAAA;EACQ,sBAAA;EACR,eAAA;EACA,6BAAA;EACA,wBAAA;EACA,qBAAA;EACA,sDAAA;EACQ,8CAAA;AAHpB;AAIY;EACE,sDAAA;EACQ,8CAAA;AAFtB;AAIY;EACE,4DAAA;EACQ,oDAAA;AAFtB","sourcesContent":["/*\r\n* Prefixed by https://autoprefixer.github.io\r\n* PostCSS: v7.0.29,\r\n* Autoprefixer: v9.7.6\r\n* Browsers: last 4 version\r\n*/\r\n\r\n@import '/styles/variables.scss';\r\n\r\n.remove-event-wrapper {\r\n    display: -webkit-box;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -webkit-box-orient: vertical;\r\n    -webkit-box-direction: normal;\r\n        -ms-flex-direction: column;\r\n            flex-direction: column;\r\n    position: absolute;\r\n    -webkit-box-pack: center;\r\n        -ms-flex-pack: center;\r\n            justify-content: center;\r\n    -webkit-box-align: center;\r\n        -ms-flex-align: center;\r\n            align-items: center;\r\n    -ms-flex-line-pack: center;\r\n        align-content: center;\r\n    left: 0;\r\n    top: 0;\r\n    width: 100%;\r\n    height: 100%;\r\n    background-color: rgba(255,255,255,0.8);\r\n\r\n    .remove-event {\r\n        display: -webkit-box;\r\n        display: -ms-flexbox;\r\n        display: flex;\r\n        max-width: 500px;\r\n        -webkit-box-orient: vertical;\r\n        -webkit-box-direction: normal;\r\n            -ms-flex-direction: column;\r\n                flex-direction: column;\r\n        -webkit-box-sizing: border-box;\r\n                box-sizing: border-box;\r\n        padding: 20px;\r\n        background-color: $color1;\r\n        -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n                box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n        border-radius: 5px;\r\n        -webkit-box-pack: center;\r\n            -ms-flex-pack: center;\r\n                justify-content: center;\r\n        -webkit-box-align: space-between;\r\n            -ms-flex-align: space-between;\r\n                align-items: space-between;\r\n\r\n        &__title {\r\n            word-wrap: break-word;\r\n        }\r\n\r\n        &__buttons {\r\n            display: -webkit-box;\r\n            display: -ms-flexbox;\r\n            display: flex;\r\n            -webkit-box-pack: end;\r\n                -ms-flex-pack: end;\r\n                    justify-content: flex-end;\r\n            width: 100%;\r\n        }\r\n\r\n        &__button {\r\n            border-radius: 5px;\r\n            border: none;\r\n            outline: none;\r\n            margin-bottom: 10px;\r\n            width: 30%;\r\n            height: 30px;\r\n            margin-left: 10px;\r\n            -webkit-box-sizing: border-box;\r\n                    box-sizing: border-box;\r\n            cursor: pointer;\r\n            -webkit-transition: ease 0.1s;\r\n            -o-transition: ease 0.1s;\r\n            transition: ease 0.1s;\r\n            -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n                    box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n            &:hover {\r\n              -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n                      box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n            }\r\n            &:active {\r\n              -webkit-box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n                      box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n            }\r\n        }\r\n    }\r\n}","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./components/selectComponent/selectComponent.scss":
+/*!**************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./components/selectComponent/selectComponent.scss ***!
+  \**************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_cssWithMappingToString_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/cssWithMappingToString.js */ "./node_modules/css-loader/dist/runtime/cssWithMappingToString.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_cssWithMappingToString_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_cssWithMappingToString_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/getUrl.js */ "./node_modules/css-loader/dist/runtime/getUrl.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _assets_arrowDown_png__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../assets/arrowDown.png */ "./assets/arrowDown.png");
+// Imports
+
+
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_cssWithMappingToString_js__WEBPACK_IMPORTED_MODULE_0___default()));
+___CSS_LOADER_EXPORT___.push([module.id, "@import url(https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap);"]);
+var ___CSS_LOADER_URL_REPLACEMENT_0___ = _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(_assets_arrowDown_png__WEBPACK_IMPORTED_MODULE_3__.default);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".select-multiply {\n  z-index: 1;\n  width: 100%;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n.select-multiply.open .select-multiply__dropdown {\n  display: flex;\n}\n.select-multiply.open .select-multiply__input {\n  border-bottom: none;\n}\n.select-multiply__dropdown {\n  display: none;\n  flex-direction: column;\n  position: fixed;\n  border: 1px solid #ccc;\n  border-radius: 5px;\n  width: 315px;\n  margin: 0px;\n  margin-top: 200px;\n  background-color: #fff;\n  max-height: 200px;\n  overflow-y: auto;\n  box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.3);\n}\n.select-multiply__dropdown-item {\n  z-index: 100;\n  width: 100%;\n  height: 35px;\n  margin: 0;\n  line-height: 35px;\n  padding-left: 10px;\n  box-sizing: border-box;\n}\n.select-multiply__dropdown-item:hover {\n  background-color: #eee;\n  cursor: pointer;\n  transition: 0.15s background-color ease-in;\n}\n.select-multiply__dropdown-item.selected {\n  background-color: #f7f6e7;\n}\n.select-multiply::after {\n  background-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\n  background-size: 10px;\n  background-repeat: no-repeat;\n  display: inline-block;\n  width: 10px;\n  height: 8px;\n  margin-right: 5px;\n  content: \"\";\n}\n.select-multiply slot {\n  display: none;\n}\n.select-multiply li {\n  list-style: none;\n}", "",{"version":3,"sources":["webpack://./components/selectComponent/selectComponent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAGA;EAEE,UAAA;EA+CE,WAAA;EACA,aAAA;EACA,mBAAA;EACA,8BAAA;AAhDJ;AACI;EACE,aAAA;AACN;AAEI;EACE,mBAAA;AAAN;AAIE;EACE,aAAA;EACA,sBAAA;EACA,eAAA;EACA,sBAAA;EACA,kBAAA;EACA,YAAA;EACA,WAAA;EACA,iBAAA;EACA,sBAAA;EAEA,iBAAA;EACA,gBAAA;EACA,0CAAA;AAHJ;AAKI;EACE,YAAA;EACA,WAAA;EACA,YAAA;EACA,SAAA;EACA,iBAAA;EACA,kBAAA;EACA,sBAAA;AAHN;AAIM;EACE,sBAAA;EACA,eAAA;EACA,0CAAA;AAFR;AAKM;EACE,yBC5CC;ADyCT;AAYI;EACE,yDAAA;EACA,qBAAA;EACA,4BAAA;EACA,qBAAA;EACA,WAAA;EACA,WAAA;EACA,iBAAA;EACA,WAAA;AAVN;AAYI;EACE,aAAA;AAVN;AAaI;EACI,gBAAA;AAXR","sourcesContent":["@import '/styles/variables.scss';\r\n// @charset \"utf-8\"; \r\n\r\n.select-multiply {\r\n  $root: &;\r\n  z-index: 1;\r\n\r\n  &.open {\r\n    #{$root}__dropdown {\r\n      display: flex;\r\n    }\r\n\r\n    #{$root}__input {\r\n      border-bottom: none;\r\n    }\r\n  }\r\n\r\n  &__dropdown {\r\n    display: none;\r\n    flex-direction: column;\r\n    position: fixed;\r\n    border: 1px solid #ccc;\r\n    border-radius: 5px;\r\n    width: 315px;\r\n    margin: 0px;\r\n    margin-top: 200px;\r\n    background-color: #fff;\r\n    \r\n    max-height: 200px;\r\n    overflow-y: auto;\r\n    box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.3);\r\n\r\n    &-item {\r\n      z-index: 100;\r\n      width: 100%;\r\n      height: 35px;\r\n      margin: 0;\r\n      line-height: 35px;\r\n      padding-left: 10px;\r\n      box-sizing: border-box;\r\n      &:hover {\r\n        background-color: #eee;\r\n        cursor: pointer;\r\n        transition: 0.15s background-color ease-in;\r\n      }\r\n\r\n      &.selected {\r\n        background-color: $color2;\r\n      }\r\n    }\r\n  }\r\n\r\n    width: 100%;\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: space-between;\r\n    &::after {\r\n      background-image: url('/assets/arrowDown.png');\r\n      background-size: 10px;\r\n      background-repeat: no-repeat;\r\n      display: inline-block;\r\n      width: 10px; \r\n      height: 8px;\r\n      margin-right: 5px;\r\n      content: '';\r\n    }\r\n    slot {\r\n      display: none;\r\n    }\r\n\r\n    li {\r\n        list-style: none;\r\n    }\r\n  }\r\n","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -1257,6 +1465,63 @@ module.exports = function cssWithMappingToString(item) {
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/runtime/getUrl.js":
+/*!********************************************************!*\
+  !*** ./node_modules/css-loader/dist/runtime/getUrl.js ***!
+  \********************************************************/
+/***/ ((module) => {
+
+
+
+module.exports = function (url, options) {
+  if (!options) {
+    // eslint-disable-next-line no-param-reassign
+    options = {};
+  } // eslint-disable-next-line no-underscore-dangle, no-param-reassign
+
+
+  url = url && url.__esModule ? url.default : url;
+
+  if (typeof url !== 'string') {
+    return url;
+  } // If url is already wrapped in quotes, remove them
+
+
+  if (/^['"].*['"]$/.test(url)) {
+    // eslint-disable-next-line no-param-reassign
+    url = url.slice(1, -1);
+  }
+
+  if (options.hash) {
+    // eslint-disable-next-line no-param-reassign
+    url += options.hash;
+  } // Should url be wrapped?
+  // See https://drafts.csswg.org/css-values-3/#urls
+
+
+  if (/["'() \t\n]/.test(url) || options.needQuotes) {
+    return "\"".concat(url.replace(/"/g, '\\"').replace(/\n/g, '\\n'), "\"");
+  }
+
+  return url;
+};
+
+/***/ }),
+
+/***/ "./assets/arrowDown.png":
+/*!******************************!*\
+  !*** ./assets/arrowDown.png ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "assets/arrowDown.png");
+
+/***/ }),
+
 /***/ "./components/calendarComponent/calendarComponent.scss":
 /*!*************************************************************!*\
   !*** ./components/calendarComponent/calendarComponent.scss ***!
@@ -1370,6 +1635,35 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_removeEvent_scss__WEBPACK_IMPORTED_MODULE_1__.default.locals || {});
+
+/***/ }),
+
+/***/ "./components/selectComponent/selectComponent.scss":
+/*!*********************************************************!*\
+  !*** ./components/selectComponent/selectComponent.scss ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_selectComponent_scss__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/sass-loader/dist/cjs.js!./selectComponent.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./components/selectComponent/selectComponent.scss");
+
+            
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_selectComponent_scss__WEBPACK_IMPORTED_MODULE_1__.default, options);
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_selectComponent_scss__WEBPACK_IMPORTED_MODULE_1__.default.locals || {});
 
 /***/ }),
 
@@ -1730,6 +2024,18 @@ module.exports = function (list, options) {
 /******/ 		};
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
@@ -1744,6 +2050,26 @@ module.exports = function (list, options) {
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		var scriptUrl;
+/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
+/******/ 		var document = __webpack_require__.g.document;
+/******/ 		if (!scriptUrl && document) {
+/******/ 			if (document.currentScript)
+/******/ 				scriptUrl = document.currentScript.src
+/******/ 			if (!scriptUrl) {
+/******/ 				var scripts = document.getElementsByTagName("script");
+/******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src
+/******/ 			}
+/******/ 		}
+/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
+/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
+/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
+/******/ 		scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
+/******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	
 /************************************************************************/

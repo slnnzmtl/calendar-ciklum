@@ -18,20 +18,19 @@ customElements.define(me, class extends HTMLElement {
           ></input>
         </Label>
         <Label 
-          class="new-event__item" 
-        >Members: 
-          <select 
-            class="new-event__input"
-            w-id="selectParticipant/participants"
-            multiple
-          >
-            <option value="John" selected>John</option>
-            <option value="Eddard">Eddard</option>
-            <option value="Robbert">Robbert</option>
-            <option value="Jaime">Jaime</option>
-            <option value="Cersei">Cersei</option>
-          </select>
+          class="new-event__item"
+        >Members:
+        <select-multiply class="new-event__input select-multiply" id="select-participants">
+        <template>
+          <slot name="John">John</slot>
+          <slot name="Cercei">Cersei</slot>
+          <slot name="Robert">Robbert</slot>
+          <slot name="Eddard">Eddard</slot>
+          <slot name="Jaime">Jaime</slot>
+        </template>
+        </select-multiply>
         </Label>
+        
         <Label 
           class="new-event__item" 
         >Day:
@@ -75,18 +74,19 @@ customElements.define(me, class extends HTMLElement {
     this.buttonCancel.onclick = () => this.cancel();
     window.newEvent = this;
 
-    new vanillaSelectBox('#selectParticipant');
+    // new vanillaSelectBox('#selectParticipant');
   }
 
   createEvent() {
     const object = {};
     object.name = this.name;
-    object.participants = this.participants;
     object.day = this.day;
     object.time = this.time;
+    object.participants = this.querySelector('#select-participants').selectValueData.split(',');
+    console.log(object)
 
-    if (object.name !== '') {
-      const cookies = Cookies.getCookie('calendar');
+    if (this.checkFields(object)) {
+      const cookies = Cookies.getCookie('calendar'); 
       let replaced;
       let events;
 
@@ -104,8 +104,26 @@ customElements.define(me, class extends HTMLElement {
         }
         location.reload();
       }
-    } else {
+    } 
+  }
+
+  checkFields(data) {
+    this.clearErrors();
+    console.log(data)
+    let error = 0;
+    if (data.name === '') {
       this.showError("Name cannot be empty.");
+      error = error + 1;
+    } 
+    if (data.participants.length === 0 || data.participants[0] === 'Choose members' ) {
+      this.showError("Please, choose members");
+      error = error + 1;
+    }
+
+    if (error > 0) {
+      return false;
+    } else {
+      return true;
     }
   }
 
@@ -128,6 +146,13 @@ customElements.define(me, class extends HTMLElement {
 
   showError(text) {
     this.insertAdjacentHTML('afterbegin', `<span class="error-message">${text}</span>`);
+  }
+
+  clearErrors() {
+    let errors = this.querySelectorAll('.error-message');
+    errors.forEach(item => {
+      item.remove();
+    })
   }
 
   cancel() {

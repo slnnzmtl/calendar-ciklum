@@ -39,6 +39,7 @@ customElements.define(me, class extends HTMLElement {
   }
 
   fillTable(events) {
+    console.log(events)
     const elements = this.querySelectorAll('table tr td');
     events.forEach((item) => {
       elements.forEach((elem) => {  
