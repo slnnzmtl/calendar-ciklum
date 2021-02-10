@@ -5,3 +5,13 @@ import '/components/removeEvent/removeEvent.js';
 import '/components/selectComponent/selectComponent.js';
 
 import '/styles/main.scss';
+
+
+const globalData = {
+    participants: [
+        'John', 'Eddard', 'Robbert', 'Jaime', 'Cersei'
+    ],
+    days: [
+        'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
+    ]
+};

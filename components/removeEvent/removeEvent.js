@@ -1,5 +1,7 @@
 import * as WcMixin from '/WcMixin.js';
 import * as Cookies from '/plugins/cookies.js';
+import EventBus from "/plugins/eventBus.js";
+
 import './removeEvent.scss';
 
 customElements.define('remove-event', class extends HTMLElement {
@@ -20,24 +22,29 @@ customElements.define('remove-event', class extends HTMLElement {
   }
 
   removeEvent() {
+    let _this = this;
+    const cookies = Cookies.getCookie('calendar');
+    const events = cookies ? JSON.parse(cookies) : [];
+    
     let day = this.getAttribute('day');
     let time = this.getAttribute('time');
-    const events = Cookies.getEvents();
+
     events.forEach((item, index) => {
       if (item.day === day && item.time === time) {
         events.splice(index, 1);
       }
     });
 
-    const eventString = JSON.stringify(events).replace('[{', '{').replace('}]', '}');
-    if (eventString !== '[]') {
-      Cookies.setCookie('calendar', eventString);
+    if (events.length > 0) {
+      Cookies.setCookie('calendar', JSON.stringify(events));
     } else {
       Cookies.deleteCookie('calendar');
     }
-    location.reload();
-  }
+    
+    EventBus.publish("refreshEvents");    
+    _this.closeTab();
 
+  }
   closeTab() {
     this.remove();
   }

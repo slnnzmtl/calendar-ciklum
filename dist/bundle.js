@@ -1,5 +1,4 @@
 /******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "./WcMixin.js":
@@ -8,6 +7,7 @@
   \********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "addAdjacentHTML": () => (/* binding */ addAdjacentHTML)
@@ -390,17 +390,43 @@ function generateProps() {
 
 /***/ }),
 
+/***/ "./assets/data.js":
+/*!************************!*\
+  !*** ./assets/data.js ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "participants": () => (/* binding */ participants),
+/* harmony export */   "workingDays": () => (/* binding */ workingDays),
+/* harmony export */   "workingHours": () => (/* binding */ workingHours)
+/* harmony export */ });
+var participants = ["John", "Robbert", "Eddard", "Jaime", "Cersei"];
+var workingDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+var workingHours = {
+  start: 10,
+  end: 18
+};
+
+/***/ }),
+
 /***/ "./components/calendarComponent/calendarComponent.js":
 /*!***********************************************************!*\
   !*** ./components/calendarComponent/calendarComponent.js ***!
   \***********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _calendarComponent_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./calendarComponent.scss */ "./components/calendarComponent/calendarComponent.scss");
 /* harmony import */ var _WcMixin_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../WcMixin.js */ "./WcMixin.js");
 /* harmony import */ var _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../plugins/cookies.js */ "./plugins/cookies.js");
-/* harmony import */ var _plugins_draggable_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../plugins/draggable.js */ "./plugins/draggable.js");
+/* harmony import */ var _assets_data_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../assets/data.js */ "./assets/data.js");
+/* harmony import */ var _plugins_draggable_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../plugins/draggable.js */ "./plugins/draggable.js");
+/* harmony import */ var _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../plugins/eventBus.js */ "./plugins/eventBus.js");
+/* harmony import */ var _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_5__);
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -433,8 +459,10 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
-var me = 'calendar-component';
-var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+
+var me = "calendar-component";
+var filter = "All members";
 customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   _inherits(_class, _HTMLElement);
 
@@ -449,49 +477,84 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   _createClass(_class, [{
     key: "connectedCallback",
     value: function connectedCallback() {
-      _WcMixin_js__WEBPACK_IMPORTED_MODULE_1__.addAdjacentHTML(this, this.createCalendar(10, 18));
+      _WcMixin_js__WEBPACK_IMPORTED_MODULE_1__.addAdjacentHTML(this, this.createTable(_assets_data_js__WEBPACK_IMPORTED_MODULE_3__.workingHours.start, _assets_data_js__WEBPACK_IMPORTED_MODULE_3__.workingHours.end));
 
       var _this = this;
 
-      document.querySelector('#filterParticipant').addEventListener('change', function (ev) {
-        _this.fillTable(_this.filterEvents(ev.target.value));
+      document.querySelector("#filterParticipant").addEventListener("change", function (ev) {
+        filter = ev.target.value;
+
+        _this.fillTable();
       });
 
-      _this.fillTable(_plugins_cookies_js__WEBPACK_IMPORTED_MODULE_2__.getEvents());
+      _this.fillTable();
+
+      _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_5__.subscribe("refreshEvents", function () {
+        _this.fillTable();
+      });
     }
   }, {
-    key: "createCalendar",
-    value: function createCalendar(start, end) {
-      var table = '<table><tr><th class="row-header">Time</th>';
-      days.forEach(function (day) {
-        table += "<th>".concat(day, "</th>");
+    key: "createTable",
+    value: function createTable(start, end) {
+      var table = document.createElement("table");
+      var tableHeader = document.createElement("tr");
+      var workingDays = _assets_data_js__WEBPACK_IMPORTED_MODULE_3__.workingDays;
+      tableHeader.insertAdjacentHTML("afterbegin", "\n      <th>Time</th>\n    ");
+      workingDays.forEach(function (item) {
+        var th = document.createElement("th");
+        th.innerText = item;
+        tableHeader.appendChild(th);
       });
-      table += '</tr>';
+      tableHeader.classList.add("table-header");
+      table.appendChild(tableHeader);
 
-      var _loop = function _loop(i) {
-        table += "<tr><th class=\"row-header\">".concat(i, ":00</th>");
-        days.forEach(function (day) {
-          table += "<td day=\"".concat(day, "\" time=\"").concat(i, "\" ondragover=\"onDragOver(event)\" ondrop=\"onDrop(event)\"></td>");
+      var _loop = function _loop() {
+        var tr = document.createElement("tr");
+        var th = document.createElement("th");
+        th.classList.add("row-header");
+        th.innerText = "".concat(hour, ":00");
+        tr.appendChild(th);
+        workingDays.forEach(function (item) {
+          var td = document.createElement("td");
+          td.dataset.day = item;
+          td.dataset.time = hour;
+          td.setAttribute("ondragover", "onDragOver(event)");
+          td.setAttribute("ondrop", "onDrop(event)");
+          tr.appendChild(td);
         });
-        table += '</tr>';
+        table.appendChild(tr);
       };
 
-      for (var i = start; i <= end; i += 1) {
-        _loop(i);
+      for (var hour = start; hour <= end; hour = hour + 1) {
+        _loop();
       }
 
-      table += '</table>';
-      return table;
+      return table.outerHTML;
     }
   }, {
     key: "fillTable",
-    value: function fillTable(events) {
-      console.log(events);
-      var elements = this.querySelectorAll('table tr td');
-      events.forEach(function (item) {
-        elements.forEach(function (elem) {
-          if (elem.getAttribute('day') === item.day && elem.getAttribute('time') === item.time) {
-            _WcMixin_js__WEBPACK_IMPORTED_MODULE_1__.addAdjacentHTML(elem, "\n            <div class=\"event-flag\" \n              draggable=\"true\" \n              ondragstart=\"onDragStart(event)\" \n              day=\"".concat(item.day, "\" \n              time=\"").concat(item.time, "\"\n            >\n              <p class=\"event-flag__name\">").concat(item.name, "</p>\n              <button class=\"event-flag__button\">X</button>\n            </div>\n          "));
+    value: function fillTable() {
+      var events = this.filterEvents();
+      if (!events) throw new Error("No events");
+      var tableCells = this.querySelectorAll("table tr td");
+      events.forEach(function (event) {
+        tableCells.forEach(function (cell) {
+          if (cell.dataset.day === event.day && cell.dataset.time === event.time) {
+            var flagElement = document.createElement("div");
+            var flagNameElement = document.createElement("p");
+            var flagButtonElement = document.createElement("button");
+            flagElement.classList.add("event-flag");
+            flagElement.draggable = "true";
+            flagElement.setAttribute("ondragstart", "onDragStart(event)");
+            flagElement.dataset.day = event.day;
+            flagElement.dataset.time = event.time;
+            flagNameElement.classList.add("event-flag__name");
+            flagNameElement.innerText = event.name;
+            flagButtonElement.classList.add("event-flag__button");
+            flagButtonElement.innerText = "X";
+            flagElement.appendChild(flagNameElement);
+            flagElement.appendChild(flagButtonElement);
+            _WcMixin_js__WEBPACK_IMPORTED_MODULE_1__.addAdjacentHTML(cell, flagElement.outerHTML);
           }
         });
       });
@@ -500,7 +563,7 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   }, {
     key: "clearTable",
     value: function clearTable() {
-      var flags = document.querySelectorAll('.event-flag');
+      var flags = document.querySelectorAll(".event-flag");
       flags.forEach(function (item) {
         item.remove();
       });
@@ -508,22 +571,29 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   }, {
     key: "showRemoveWindow",
     value: function showRemoveWindow(target) {
-      var main = document.querySelector('#main');
+      var main = document.querySelector("#main");
+      var removeWindow = document.createElement("remove-event");
       var parent = {};
-      parent.name = target.parentElement.querySelector('.event-flag__name').textContent;
-      parent.day = target.parentElement.getAttribute('day');
-      parent.time = target.parentElement.getAttribute('time');
-      main.insertAdjacentHTML('afterbegin', "\n        <remove-event class=\"remove-event-wrapper\" \n          name=\"".concat(parent.name, "\" \n          day=\"").concat(parent.day, "\" \n          time=\"").concat(parent.time, "\"\n        ></remove-event>\n      "));
+      parent.name = target.parentElement.querySelector(".event-flag__name").textContent;
+      parent.day = target.parentElement.dataset.day;
+      parent.time = target.parentElement.dataset.time;
+      removeWindow.classList.add("remove-event-wrapper");
+      removeWindow.dataset.name = parent.name;
+      removeWindow.dataset.day = parent.day;
+      removeWindow.dataset.time = parent.time;
+      main.insertAdjacentElement("afterbegin", removeWindow);
     }
   }, {
     key: "filterEvents",
-    value: function filterEvents(value) {
+    value: function filterEvents() {
+      var value = filter;
       this.clearTable();
-      var events = _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_2__.getEvents();
+      var cookies = _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_2__.getCookie("calendar");
+      var events = cookies !== undefined ? JSON.parse(cookies) : [];
       var result = [];
 
-      if (value !== '') {
-        if (events && events !== 'undefined') {
+      if (value !== "All members") {
+        if (events && events !== "undefined") {
           events.forEach(function (item) {
             if (item.participants.includes(value)) {
               result.push(item);
@@ -541,9 +611,9 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
     value: function addRemoveEventListeners() {
       var _this = this;
 
-      var buttons = this.querySelectorAll('.event-flag__button');
+      var buttons = this.querySelectorAll(".event-flag__button");
       buttons.forEach(function (button) {
-        button.addEventListener('click', function (e) {
+        button.addEventListener("click", function (e) {
           _this.showRemoveWindow(e.target);
         });
       });
@@ -561,9 +631,11 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   \*****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../WcMixin.js */ "./WcMixin.js");
-/* harmony import */ var _calendarHeader_scss__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./calendarHeader.scss */ "./components/calendarHeader/calendarHeader.scss");
+/* harmony import */ var _assets_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../assets/data */ "./assets/data.js");
+/* harmony import */ var _calendarHeader_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./calendarHeader.scss */ "./components/calendarHeader/calendarHeader.scss");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -594,8 +666,8 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
-var me = 'calendar-header';
-customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
+
+customElements.define("calendar-header", /*#__PURE__*/function (_HTMLElement) {
   _inherits(_class, _HTMLElement);
 
   var _super = _createSuper(_class);
@@ -611,7 +683,9 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
     value: function connectedCallback() {
       var _this = this;
 
-      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <h1 class=\"calendar-header__header\">Calendar</h1>\n      <div class=\"calendar-header__options\">\n        <select \n          class=\"calendar-header__filter\"\n          w-id=\"filterParticipant/participant\"    \n        >\n          <option value=\"\" selected>All members</option>\n          <option value=\"John\">John</option>\n          <option value=\"Eddard\">Eddard</option>\n          <option value=\"Robbert\">Robbert</option>\n          <option value=\"Jaime\">Jaime</option>\n          <option value=\"Cersei\">Cersei</option>\n        </select>\n        <button w-id=\"buttonElem/button\" class=\"calendar-header__button\">New Event+</button>\n      </div>\n    ");
+      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <h1 class=\"calendar-header__header\">Calendar</h1>\n      <div class=\"calendar-header__options\">\n        <select \n          class=\"calendar-header__filter\"\n          w-id=\"filterParticipant/participant\"    \n        ></select>\n        <button w-id=\"buttonElem/button\" class=\"calendar-header__button\">New Event+</button>\n      </div>\n    ");
+      this.filterParticipant.appendChild(this.getParticipants(_assets_data__WEBPACK_IMPORTED_MODULE_1__.participants));
+      console.log(this.getParticipants(_assets_data__WEBPACK_IMPORTED_MODULE_1__.participants));
 
       this.buttonElem.onclick = function () {
         return _this.newEvent();
@@ -620,8 +694,25 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   }, {
     key: "newEvent",
     value: function newEvent() {
-      var main = document.querySelector('#main');
-      main.insertAdjacentHTML('afterbegin', "\n      <new-event class=\"new-event-container\"></new-event>\n    ");
+      var main = document.querySelector("#main");
+      var containerElement = document.createElement('new-event');
+      containerElement.classList.add('new-event-container');
+      main.appendChild(containerElement);
+    }
+  }, {
+    key: "getParticipants",
+    value: function getParticipants(array) {
+      var template = document.createDocumentFragment();
+      var allMembersOption = document.createElement('option');
+      allMembersOption.innerText = "All members";
+      template.appendChild(allMembersOption);
+      array.forEach(function (item) {
+        var option = document.createElement("option");
+        option.dataset.name = item;
+        option.innerText = item;
+        template.appendChild(option);
+      });
+      return template;
     }
   }]);
 
@@ -636,10 +727,14 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   \*****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../WcMixin.js */ "./WcMixin.js");
 /* harmony import */ var _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../plugins/cookies.js */ "./plugins/cookies.js");
 /* harmony import */ var _newEvent_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./newEvent.scss */ "./components/newEvent/newEvent.scss");
+/* harmony import */ var _assets_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../assets/data */ "./assets/data.js");
+/* harmony import */ var _plugins_eventBus__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../plugins/eventBus */ "./plugins/eventBus.js");
+/* harmony import */ var _plugins_eventBus__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_plugins_eventBus__WEBPACK_IMPORTED_MODULE_4__);
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -671,8 +766,9 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
-var me = 'new-event';
-customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
+
+
+customElements.define("new-event", /*#__PURE__*/function (_HTMLElement) {
   _inherits(_class, _HTMLElement);
 
   var _super = _createSuper(_class);
@@ -688,17 +784,56 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
     value: function connectedCallback() {
       var _this = this;
 
-      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <div class=\"new-event\">\n        <Label \n          class=\"new-event__item\" \n        >Name: \n          <input autofocus\n            class=\"new-event__input\"\n            w-id=\"inputName/name\"\n          ></input>\n        </Label>\n        <Label \n          class=\"new-event__item\"\n        >Members:\n        <select-multiply class=\"new-event__input select-multiply\" id=\"select-participants\">\n        <template>\n          <slot name=\"John\">John</slot>\n          <slot name=\"Cercei\">Cersei</slot>\n          <slot name=\"Robert\">Robbert</slot>\n          <slot name=\"Eddard\">Eddard</slot>\n          <slot name=\"Jaime\">Jaime</slot>\n        </template>\n        </select-multiply>\n        </Label>\n        \n        <Label \n          class=\"new-event__item\" \n        >Day:\n          <select \n            class=\"new-event__input\"\n            w-id=\"inputDay/day\"\n          >\n            <option value=\"Monday\" selected>Monday</option>\n            <option value=\"Tuesday\">Tuesday</option>\n            <option value=\"Wednesday\">Wednesday</option>\n            <option value=\"Thursday\">Thursday</option>\n            <option value=\"Friday\">Friday</option>\n          </select>\n        </Label>\n        <Label \n          class=\"new-event__item\" \n        >Time:\n          <select \n            class=\"new-event__input\"\n            w-id=\"inputTime/time\"\n          >\n            <option value=\"10\">10:00</option>\n            <option value=\"11\">11:00</option>\n            <option value=\"12\">12:00</option>\n            <option value=\"13\">13:00</option>\n            <option value=\"14\">14:00</option>\n            <option value=\"15\">15:00</option>\n            <option value=\"16\">16:00</option>\n            <option value=\"17\">17:00</option>\n            <option value=\"18\">18:00</option>\n          </select>\n        </Label>\n        <div class=\"new-event__button-wrapper\">\n          <button w-id=\"buttonCreate/create\" class=\"new-event__button\">Create</button>\n          <button w-id=\"buttonCancel/cancel\" class=\"new-event__button\">Cancel</button>\n        </div>\n      </div>\n    ");
+      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n    <div class=\"new-event\">\n      <Label class=\"new-event__item\">\n        Name: \n        <input autofocus\n          class=\"new-event__input\"\n          w-id=\"inputName/name\"\n        ></input>\n      </Label>\n\n      <Label \n        class=\"new-event__item\"\n        w-id=\"participantsLabel/participantsLabelValue\"\n      >Members:\n      </Label>\n\n      <Label \n          class=\"new-event__item\" \n      >Day:\n        <select \n          class=\"new-event__input\"\n          w-id=\"inputDay/day\"\n        ></select>\n      </label>\n\n      <Label \n          class=\"new-event__item\" \n        >Time:\n          <select \n            class=\"new-event__input\"\n            w-id=\"inputTime/time\"\n          ></select>\n      </label>\n\n      <div class=\"new-event__button-wrapper\">\n        <button w-id=\"buttonCreate/create\" class=\"new-event__button\">Create</button>\n        <button w-id=\"buttonCancel/buttonCancelValue\" class=\"new-event__button\">Cancel</button>\n      </div>\n    </div>\n  ");
+      this.formSetData();
 
       this.buttonCreate.onclick = function () {
         return _this.createEvent();
       };
 
       this.buttonCancel.onclick = function () {
-        return _this.cancel();
+        return _this.closeTab();
       };
 
-      window.newEvent = this; // new vanillaSelectBox('#selectParticipant');
+      window.newEvent = this;
+    }
+  }, {
+    key: "formSetData",
+    value: function formSetData() {
+      var _this2 = this;
+
+      var participants = document.createElement("select-multiply");
+      participants.className = "new-event__input select-multiply";
+      participants.id = "select-participants";
+      participants.appendChild(this.getParticipants(_assets_data__WEBPACK_IMPORTED_MODULE_3__.participants));
+      this.participantsLabel.appendChild(participants);
+      _assets_data__WEBPACK_IMPORTED_MODULE_3__.workingDays.forEach(function (item) {
+        var option = document.createElement("option");
+        option.dataset.value = item;
+        option.innerText = item;
+
+        _this2.inputDay.appendChild(option);
+      });
+
+      for (var i = _assets_data__WEBPACK_IMPORTED_MODULE_3__.workingHours.start; i <= _assets_data__WEBPACK_IMPORTED_MODULE_3__.workingHours.end; i = i + 1) {
+        var option = document.createElement("option");
+        option.dataset.value = i;
+        option.innerText = "".concat(i, ":00");
+        this.inputTime.appendChild(option);
+      }
+    }
+  }, {
+    key: "getParticipants",
+    value: function getParticipants(array) {
+      var template = document.createElement("div");
+      template.dataset.name = "template";
+      array.forEach(function (item) {
+        var slot = document.createElement("slot");
+        slot.dataset.name = item;
+        slot.innerText = item;
+        template.appendChild(slot);
+      });
+      return template;
     }
   }, {
     key: "createEvent",
@@ -707,29 +842,24 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
       object.name = this.name;
       object.day = this.day;
       object.time = this.time;
-      object.participants = this.querySelector('#select-participants').selectValueData.split(',');
-      console.log(object);
+      object.participants = this.querySelector("#select-participants").selectValueData.split(",");
 
       if (this.checkFields(object)) {
-        var cookies = _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.getCookie('calendar');
-        var replaced;
-        var events;
-
-        if (cookies) {
-          replaced = cookies.replaceAll('},', '}},');
-        }
-
-        events = replaced && replaced !== 'undefined' ? replaced.split('},') : undefined;
+        var cookies = _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.getCookie("calendar");
+        var events = cookies ? JSON.parse(cookies) : [];
 
         if (!this.checkIfExist(events, object)) {
-          if (events && events !== 'undefined') {
-            var data = "".concat(events, ",").concat(JSON.stringify(object));
-            _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.setCookie('calendar', data);
+          if (events && events !== "undefined") {
+            events.push(object);
+            _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.setCookie("calendar", JSON.stringify(events));
           } else {
-            _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.setCookie('calendar', JSON.stringify(object));
+            events[0] = object;
+            _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.setCookie("calendar", JSON.stringify(events));
           }
 
-          location.reload();
+          _plugins_eventBus__WEBPACK_IMPORTED_MODULE_4__.publish("refreshEvents");
+          object = {};
+          this.closeTab();
         }
       }
     }
@@ -737,64 +867,61 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
     key: "checkFields",
     value: function checkFields(data) {
       this.clearErrors();
-      console.log(data);
       var error = 0;
 
-      if (data.name === '') {
+      if (data.name === "") {
         this.showError("Name cannot be empty.");
-        error = error + 1;
+        error += 1;
       }
 
-      if (data.participants.length === 0 || data.participants[0] === 'Choose members') {
+      if (data.participants.length === 0 || data.participants[0] === "Choose members") {
         this.showError("Please, choose members");
-        error = error + 1;
+        error += 1;
       }
 
       if (error > 0) {
         return false;
-      } else {
-        return true;
       }
+
+      return true;
     }
   }, {
     key: "checkIfExist",
     value: function checkIfExist(data, object) {
-      var _this2 = this;
+      var _this3 = this;
 
-      if (data) {
-        var result = false;
-        data.forEach(function (item) {
-          if (item) {
-            item = JSON.parse(item);
+      var result = false;
+      data.forEach(function (item) {
+        if (item) {
+          if (item.day === object.day && item.time === object.time) {
+            result = true;
 
-            if (item.day === object.day && item.time === object.time) {
-              result = true;
-
-              _this2.showError('This time is already taken.');
-            }
+            _this3.showError("This time is already taken.");
           }
-        });
-        return result;
-      }
-
-      return false;
+        }
+      });
+      return result;
     }
   }, {
     key: "showError",
     value: function showError(text) {
-      this.insertAdjacentHTML('afterbegin', "<span class=\"error-message\">".concat(text, "</span>"));
+      var span = document.createElement("span");
+      span.classList.add("error-message");
+      span.innerText = text;
+      this.insertAdjacentElement("afterbegin", span);
     }
   }, {
     key: "clearErrors",
     value: function clearErrors() {
-      var errors = this.querySelectorAll('.error-message');
+      var errors = this.querySelectorAll(".error-message");
       errors.forEach(function (item) {
         item.remove();
       });
     }
   }, {
-    key: "cancel",
-    value: function cancel() {
+    key: "closeTab",
+    value: function closeTab() {
+      _plugins_eventBus__WEBPACK_IMPORTED_MODULE_4__.publish("resetForm");
       this.remove();
     }
   }]);
@@ -810,10 +937,13 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   \***********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../WcMixin.js */ "./WcMixin.js");
 /* harmony import */ var _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../plugins/cookies.js */ "./plugins/cookies.js");
-/* harmony import */ var _removeEvent_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./removeEvent.scss */ "./components/removeEvent/removeEvent.scss");
+/* harmony import */ var _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../plugins/eventBus.js */ "./plugins/eventBus.js");
+/* harmony import */ var _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _removeEvent_scss__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./removeEvent.scss */ "./components/removeEvent/removeEvent.scss");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -841,6 +971,7 @@ function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[nat
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
 
 
 
@@ -859,38 +990,42 @@ customElements.define('remove-event', /*#__PURE__*/function (_HTMLElement) {
   _createClass(_class, [{
     key: "connectedCallback",
     value: function connectedCallback() {
-      var _this = this;
+      var _this2 = this;
 
       _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n    <div class=\"remove-event\">\n      <p class=\"remove-event__title\">Are you sure you want to delete \xAB".concat(this.getAttribute('name'), "\xBB event?</p>\n      <div class=\"remove-event__buttons\">\n        <button class=\"remove-event__button\" w-id=\"buttonYes/yes\">Yes</button>\n        <button class=\"remove-event__button\" w-id=\"buttonNo/no\">No</button\n      </div>\n    </div>\n    "));
 
       this.buttonYes.onclick = function () {
-        return _this.removeEvent();
+        return _this2.removeEvent();
       };
 
       this.buttonNo.onclick = function () {
-        return _this.closeTab();
+        return _this2.closeTab();
       };
     }
   }, {
     key: "removeEvent",
     value: function removeEvent() {
+      var _this = this;
+
+      var cookies = _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.getCookie('calendar');
+      var events = cookies ? JSON.parse(cookies) : [];
       var day = this.getAttribute('day');
       var time = this.getAttribute('time');
-      var events = _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.getEvents();
       events.forEach(function (item, index) {
         if (item.day === day && item.time === time) {
           events.splice(index, 1);
         }
       });
-      var eventString = JSON.stringify(events).replace('[{', '{').replace('}]', '}');
 
-      if (eventString !== '[]') {
-        _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.setCookie('calendar', eventString);
+      if (events.length > 0) {
+        _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.setCookie('calendar', JSON.stringify(events));
       } else {
         _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.deleteCookie('calendar');
       }
 
-      location.reload();
+      _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2___default().publish("refreshEvents");
+
+      _this.closeTab();
     }
   }, {
     key: "closeTab",
@@ -910,9 +1045,12 @@ customElements.define('remove-event', /*#__PURE__*/function (_HTMLElement) {
   \*******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../WcMixin.js */ "./WcMixin.js");
 /* harmony import */ var _selectComponent_scss__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./selectComponent.scss */ "./components/selectComponent/selectComponent.scss");
+/* harmony import */ var _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../plugins/eventBus.js */ "./plugins/eventBus.js");
+/* harmony import */ var _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2__);
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -943,8 +1081,9 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
-var items = [];
-customElements.define('select-multiply', /*#__PURE__*/function (_HTMLElement) {
+
+var selectedItems = [];
+customElements.define("select-multiply", /*#__PURE__*/function (_HTMLElement) {
   _inherits(_class, _HTMLElement);
 
   var _super = _createSuper(_class);
@@ -960,86 +1099,94 @@ customElements.define('select-multiply', /*#__PURE__*/function (_HTMLElement) {
     value: function connectedCallback() {
       var _this2 = this;
 
-      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <p class=\"select-multiply__value\" w-id=\"selectValue/selectValueData\">".concat(items.length > 0 ? items : 'Choose members', "</p>\n      <div class=\"select-multiply__dropdown\" w-id=\"dropdownList/dropdownListValue\">\n        <p class=\"select-multiply__dropdown-item\" w-id=\"selectAll/selectAllValue\" value=\"all\">Select All</p>\n      </div>\n    "));
+      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <p class=\"select-multiply__value\" \n        w-id=\"selectValue/selectValueData\"\n        >Choose members\n      </p>\n      <div class=\"select-multiply__dropdown\" \n        w-id=\"dropdownList/dropdownListValue\">\n          <p class=\"select-multiply__dropdown-item\" \n            w-id=\"selectAll/selectAllValue\" \n            value=\"all\"\n            >Select All\n          </p>\n      </div>\n    ");
       this.dropdownList.appendChild(this.getList(this));
 
-      document.querySelector('.new-event').onclick = function () {
+      document.querySelector(".new-event").onclick = function () {
         return _this2.showDropDown(_this2);
       };
 
-      this.querySelectorAll('.select-multiply__dropdown-item').forEach(function (elem) {
+      this.querySelectorAll(".select-multiply__dropdown-item").forEach(function (elem) {
         elem.onclick = function () {
           return _this2.choose(elem);
         };
+      });
+      (0,_plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2__.subscribe)("resetForm", function () {
+        selectedItems = [];
       });
     }
   }, {
     key: "getList",
     value: function getList(_this) {
-      var template = _this.querySelector('template');
+      var template = _this.querySelector("div[data-name=template]");
 
-      var slots = Array.from(template.content.children);
       var list = document.createDocumentFragment();
-      slots.forEach(function (slot, index) {
-        var elem = document.createElement('p');
-        elem.innerHTML = slot.innerHTML;
-        elem.setAttribute('name', slot.name);
-        elem.setAttribute('value', slot.innerHTML);
-        elem.className = _this.tagName.toLowerCase() + '__dropdown-item';
-        list.appendChild(elem);
-      });
-      template.remove();
+
+      if (template) {
+        var slots = Array.from(template.children);
+        slots.forEach(function (slot, index) {
+          var elem = document.createElement("p");
+          elem.innerHTML = slot.innerHTML;
+          elem.dataset.name = slot.name;
+          elem.dataset.value = slot.innerHTML;
+          elem.className = _this.tagName.toLowerCase() + "__dropdown-item";
+          list.appendChild(elem);
+        });
+        template.remove();
+      }
+
       return list;
     }
   }, {
     key: "choose",
     value: function choose(elem) {
-      var value = elem.getAttribute('value');
+      var value = elem.dataset.value;
+      var selected = elem.classList.contains("selected");
 
-      if (value !== 'all') {
-        if (!elem.classList.contains('selected')) {
-          elem.classList.add('selected');
-          items.push(value);
+      if (value !== "all") {
+        if (!selected) {
+          elem.classList.add("selected");
+          selectedItems.push(value);
         } else {
-          elem.classList.remove('selected');
-          this.selectAll.classList.remove('selected');
-          items.forEach(function (item, index) {
+          elem.classList.remove("selected");
+          this.selectAll.classList.remove("selected");
+          selectedItems.forEach(function (item, index) {
             if (item === value) {
-              items.splice(index, 1);
+              selectedItems.splice(index, 1);
             }
           });
         }
       } else {
         var all = Array.from(elem.parentNode.children);
 
-        if (!elem.classList.contains('selected')) {
-          items = [];
+        if (!selected) {
+          selectedItems = [];
           all.forEach(function (item, index) {
             if (index > 0) {
-              items.push(item.getAttribute('value'));
+              selectedItems.push(item.dataset.value);
             }
 
-            item.classList.add('selected');
+            item.classList.add("selected");
           });
         } else {
           all.forEach(function (item) {
-            item.classList.remove('selected');
+            item.classList.remove("selected");
           });
-          items = [];
+          selectedItems = [];
         }
       }
 
-      this.selectValueData = items;
+      this.selectValueData = selectedItems.length ? selectedItems.join(", ") : "Choose members";
     }
   }, {
     key: "showDropDown",
     value: function showDropDown(elem) {
       var classList = event.target.classList;
 
-      if (classList.contains('select-multiply') || classList.contains('select-multiply__dropdown-item')) {
-        elem.classList.add('open');
-      } else {
-        elem.classList.remove('open');
+      if (classList.contains("select-multiply") || classList.contains("select-multiply__value")) {
+        elem.classList.toggle("open");
+      } else if (classList.contains("select-multiply__dropdown-item")) {} else {
+        elem.classList.remove("open");
       }
     }
   }]);
@@ -1055,6 +1202,7 @@ customElements.define('select-multiply', /*#__PURE__*/function (_HTMLElement) {
   \*****************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_calendarComponent_calendarComponent_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../components/calendarComponent/calendarComponent.js */ "./components/calendarComponent/calendarComponent.js");
 /* harmony import */ var _components_calendarHeader_calendarHeader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../components/calendarHeader/calendarHeader.js */ "./components/calendarHeader/calendarHeader.js");
@@ -1068,6 +1216,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var globalData = {
+  participants: ['John', 'Eddard', 'Robbert', 'Jaime', 'Cersei'],
+  days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+};
 
 /***/ }),
 
@@ -1077,12 +1229,12 @@ __webpack_require__.r(__webpack_exports__);
   \****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "setCookie": () => (/* binding */ setCookie),
 /* harmony export */   "getCookie": () => (/* binding */ getCookie),
-/* harmony export */   "deleteCookie": () => (/* binding */ deleteCookie),
-/* harmony export */   "getEvents": () => (/* binding */ getEvents)
+/* harmony export */   "deleteCookie": () => (/* binding */ deleteCookie)
 /* harmony export */ });
 function setCookie(key, value) {
   document.cookie = "".concat(key, "=").concat(encodeURIComponent(value));
@@ -1094,14 +1246,6 @@ function getCookie(key) {
 function deleteCookie(key) {
   document.cookie = "".concat(key, "=; Max-Age=0");
 }
-function getEvents() {
-  var replaced = getCookie('calendar').replaceAll('},', '}},');
-  var events = replaced.split('},');
-  events.forEach(function (item, index) {
-    events[index] = JSON.parse(item);
-  });
-  return events;
-}
 
 /***/ }),
 
@@ -1111,6 +1255,7 @@ function getEvents() {
   \******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "onDragStart": () => (/* binding */ onDragStart),
@@ -1136,11 +1281,11 @@ function onDrop(event) {
 
 function putElement(element, dropzone) {
   var drop = {};
-  var events = _cookies_js__WEBPACK_IMPORTED_MODULE_0__.getEvents();
-  element.day = element.getAttribute('day');
-  element.time = element.getAttribute('time');
-  drop.day = dropzone.getAttribute('day');
-  drop.time = dropzone.getAttribute('time');
+  var events = JSON.parse(_cookies_js__WEBPACK_IMPORTED_MODULE_0__.getCookie('calendar'));
+  element.day = element.dataset.day;
+  element.time = element.dataset.time;
+  drop.day = dropzone.dataset.day;
+  drop.time = dropzone.dataset.time;
 
   if (dropzoneCheck(events, drop)) {
     dropzone.appendChild(element);
@@ -1150,8 +1295,8 @@ function putElement(element, dropzone) {
         item.time = drop.time;
       }
 
-      element.setAttribute('day', drop.day);
-      element.setAttribute('time', drop.time);
+      element.dataset.day = drop.day;
+      element.dataset.time = drop.time;
     });
     savePosition(events);
   }
@@ -1171,13 +1316,56 @@ function dropzoneCheck(events, drop) {
 }
 
 function savePosition(events) {
-  var eventString = JSON.stringify(events).replace('[{', '{').replace('}]', '}');
-  _cookies_js__WEBPACK_IMPORTED_MODULE_0__.setCookie('calendar', eventString);
+  _cookies_js__WEBPACK_IMPORTED_MODULE_0__.setCookie('calendar', JSON.stringify(events));
 }
 
 window.onDragStart = onDragStart;
 window.onDragOver = onDragOver;
 window.onDrop = onDrop;
+
+/***/ }),
+
+/***/ "./plugins/eventBus.js":
+/*!*****************************!*\
+  !*** ./plugins/eventBus.js ***!
+  \*****************************/
+/***/ ((module) => {
+
+var subscriptions = {};
+var getNextUniqueId = getIdGenerator();
+
+function subscribe(eventType, callback) {
+  var id = getNextUniqueId();
+  if (!subscriptions[eventType]) subscriptions[eventType] = {};
+  subscriptions[eventType][id] = callback;
+  return {
+    unsubscribe: function unsubscribe() {
+      delete subscriptions[eventType][id];
+      if (Object.keys(subscriptions[eventType]).length === 0) delete subscriptions[eventType];
+    }
+  };
+}
+
+function publish(eventType, arg) {
+  console.log(eventType);
+  if (!subscriptions[eventType]) return;
+  Object.keys(subscriptions[eventType]).forEach(function (key) {
+    return subscriptions[eventType][key](arg);
+  });
+}
+
+function getIdGenerator() {
+  var lastId = 0;
+  return function getNextUniqueId() {
+    lastId += 1;
+    return lastId;
+  };
+}
+
+module.exports = {
+  publish: publish,
+  subscribe: subscribe
+};
 
 /***/ }),
 
@@ -1187,6 +1375,7 @@ window.onDrop = onDrop;
   \******************************************************************************************************************************************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1201,7 +1390,7 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_cssWithMappingToString_js__WEBPACK_IMPORTED_MODULE_0___default()));
 ___CSS_LOADER_EXPORT___.push([module.id, "@import url(https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap);"]);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "table {\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  border-collapse: collapse;\n  width: 100%;\n  margin: auto;\n  height: 90vmin;\n  table-layout: fixed;\n}\ntable tr .row-header {\n  width: 5%;\n}\n@media (max-width: 900px) {\n  table tr .row-header {\n    width: 10%;\n  }\n}\n\ntable tr:first-child {\n  height: 5vh !important;\n}\n\ntable td {\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  height: 10%;\n  padding: 0;\n  margin: 0;\n}\ntable td .event-flag {\n  cursor: move;\n  cursor: grab;\n  cursor: -webkit-grab;\n  height: 100%;\n  width: 100%;\n  background-color: #f7f6e7;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n  -ms-flex-pack: justify;\n  justify-content: space-between;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n  padding: 10px;\n}\ntable td .event-flag__name {\n  word-wrap: break-word;\n  width: 90%;\n}\ntable td .event-flag:active {\n  cursor: grabbing;\n  cursor: -webkit-grabbing;\n}\ntable td .event-flag__button {\n  background: none;\n  border: none;\n  outline: none;\n  cursor: pointer;\n}\n\ntd, th {\n  border: 2px solid #B9CBC3;\n}\n@media (max-width: 700px) {\n  td, th {\n    font-size: 12px;\n  }\n}\n@media (max-width: 400px) {\n  td, th {\n    font-size: 10px;\n  }\n}\n\nth {\n  font-weight: bold;\n  background-color: #B9CBC3;\n  font-family: \"Lora\", serif;\n}", "",{"version":3,"sources":["webpack://./components/calendarComponent/calendarComponent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAEA;EACE,sDAAA;EACQ,8CAAA;EACR,yBAAA;EACA,WAAA;EACA,YAAA;EACA,cAAA;EACA,mBAAA;AAAF;AAGI;EACI,SAAA;AADR;AAEQ;EAFJ;IAGM,UAAA;EACR;AACF;;AAIA;EACE,sBAAA;AADF;;AAIA;EACE,8BAAA;EACQ,sBAAA;EACR,WAAA;EACA,UAAA;EACA,SAAA;AADF;AAGE;EACE,YAAA;EACA,YAAA;EACA,oBAAA;EAEA,YAAA;EACA,WAAA;EACA,yBCpCK;EDqCL,8BAAA;EACQ,sBAAA;EACR,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,yBAAA;EACI,sBAAA;EACI,8BAAA;EACR,yBAAA;EACI,sBAAA;EACI,mBAAA;EACR,aAAA;AAFJ;AAII;EACE,qBAAA;EACA,UAAA;AAFN;AAKI;EACE,gBAAA;EACA,wBAAA;AAHN;AAMI;EACE,gBAAA;EACA,YAAA;EACA,aAAA;EACA,eAAA;AAJN;;AAUA;EACE,yBAAA;AAPF;AAQE;EAFF;IAGI,eAAA;EALF;AACF;AAME;EALF;IAMI,eAAA;EAHF;AACF;;AAMA;EACE,iBAAA;EACA,yBCnFO;EDoFP,0BChFM;AD6ER","sourcesContent":["@import '/styles/variables.scss';\r\n\r\ntable {\r\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n          box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n  border-collapse: collapse;\r\n  width: 100%;\r\n  margin: auto;\r\n  height: 90vmin;\r\n  table-layout: fixed;\r\n\r\n  tr {\r\n    .row-header {\r\n        width: 5%;\r\n        @media (max-width: 900px) {\r\n          width: 10%;\r\n        }\r\n    }\r\n  }\r\n}\r\n\r\ntable tr:first-child {\r\n  height: 5vh!important;\r\n}\r\n\r\ntable td {\r\n  -webkit-box-sizing: border-box;\r\n          box-sizing: border-box;\r\n  height: 10%;\r\n  padding: 0;\r\n  margin: 0;\r\n\r\n  .event-flag {\r\n    cursor: move;\r\n    cursor: grab;\r\n    cursor: -webkit-grab;\r\n\r\n    height: 100%;\r\n    width: 100%;\r\n    background-color: $color2;\r\n    -webkit-box-sizing: border-box;\r\n            box-sizing: border-box;\r\n    display:-webkit-box;\r\n    display:-ms-flexbox;\r\n    display:flex;\r\n    -webkit-box-pack: justify;\r\n        -ms-flex-pack: justify;\r\n            justify-content: space-between;\r\n    -webkit-box-align: center;\r\n        -ms-flex-align: center;\r\n            align-items: center;\r\n    padding: 10px;\r\n\r\n    &__name {\r\n      word-wrap: break-word;\r\n      width: 90%;\r\n    }\r\n\r\n    &:active {\r\n      cursor: grabbing;\r\n      cursor: -webkit-grabbing;\r\n    }\r\n\r\n    &__button {\r\n      background: none;\r\n      border: none;\r\n      outline: none;\r\n      cursor: pointer;\r\n    }\r\n  }\r\n}\r\n\r\n\r\ntd, th {\r\n  border: 2px solid $color1;\r\n  @media (max-width: 700px) {\r\n    font-size: 12px;\r\n  }\r\n  @media (max-width: 400px) {\r\n    font-size: 10px;\r\n  }\r\n}\r\n\r\nth {\r\n  font-weight: bold;\r\n  background-color: $color1;\r\n  font-family: $font1;\r\n}","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, "table {\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  border-collapse: collapse;\n  width: 100%;\n  margin: auto;\n  height: 90vmin;\n  table-layout: fixed;\n}\ntable .table-header th:first-child {\n  width: 4em;\n}\ntable tr:first-child {\n  height: 2em !important;\n}\ntable td {\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  height: 10%;\n  padding: 0;\n  margin: 0;\n}\ntable td .event-flag {\n  cursor: move;\n  cursor: grab;\n  cursor: -webkit-grab;\n  height: 100%;\n  width: 100%;\n  background-color: #f7f6e7;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n  -ms-flex-pack: justify;\n  justify-content: space-between;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n  padding: 10px;\n}\ntable td .event-flag__name {\n  word-wrap: break-word;\n  width: 90%;\n}\ntable td .event-flag:active {\n  cursor: grabbing;\n  cursor: -webkit-grabbing;\n}\ntable td .event-flag__button {\n  background: none;\n  border: none;\n  outline: none;\n  cursor: pointer;\n}\ntable td, table th {\n  border: 2px solid #B9CBC3;\n}\n@media (max-width: 700px) {\n  table td, table th {\n    font-size: 12px;\n  }\n}\n@media (max-width: 400px) {\n  table td, table th {\n    font-size: 10px;\n  }\n}\ntable th {\n  font-weight: bold;\n  font-family: \"Lora\", serif;\n  background-color: #B9CBC3;\n  box-sizing: border-box;\n}", "",{"version":3,"sources":["webpack://./components/calendarComponent/calendarComponent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAEA;EACE,sDAAA;EACQ,8CAAA;EACR,yBAAA;EACA,WAAA;EACA,YAAA;EACA,cAAA;EACA,mBAAA;AAAF;AAEE;EACE,UAAA;AAAJ;AAII;EACE,sBAAA;AAFN;AAME;EACE,8BAAA;EACQ,sBAAA;EACR,WAAA;EACA,UAAA;EACA,SAAA;AAJJ;AAMI;EACE,YAAA;EACA,YAAA;EACA,oBAAA;EAEA,YAAA;EACA,WAAA;EACA,yBChCG;EDiCH,8BAAA;EACQ,sBAAA;EACR,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,yBAAA;EACI,sBAAA;EACI,8BAAA;EACR,yBAAA;EACI,sBAAA;EACI,mBAAA;EACR,aAAA;AALN;AAOM;EACE,qBAAA;EACA,UAAA;AALR;AAQM;EACE,gBAAA;EACA,wBAAA;AANR;AASM;EACE,gBAAA;EACA,YAAA;EACA,aAAA;EACA,eAAA;AAPR;AAYE;EACE,yBAAA;AAVJ;AAWI;EAFF;IAGI,eAAA;EARJ;AACF;AASI;EALF;IAMI,eAAA;EANJ;AACF;AASE;EACE,iBAAA;EACA,0BC1EI;ED2EJ,yBC/EK;EDgFL,sBAAA;AAPJ","sourcesContent":["@import '/styles/variables.scss';\r\n\r\ntable {\r\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n          box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n  border-collapse: collapse;\r\n  width: 100%;\r\n  margin: auto;\r\n  height: 90vmin;\r\n  table-layout: fixed;\r\n\r\n  .table-header th:first-child{\r\n    width: 4em;\r\n  }\r\n\r\n  tr {\r\n    &:first-child {\r\n      height: 2em!important;\r\n    }\r\n  }\r\n\r\n  td {\r\n    -webkit-box-sizing: border-box;\r\n            box-sizing: border-box;\r\n    height: 10%;\r\n    padding: 0;\r\n    margin: 0;\r\n  \r\n    .event-flag {\r\n      cursor: move;\r\n      cursor: grab;\r\n      cursor: -webkit-grab;\r\n  \r\n      height: 100%;\r\n      width: 100%;\r\n      background-color: $color2;\r\n      -webkit-box-sizing: border-box;\r\n              box-sizing: border-box;\r\n      display:-webkit-box;\r\n      display:-ms-flexbox;\r\n      display:flex;\r\n      -webkit-box-pack: justify;\r\n          -ms-flex-pack: justify;\r\n              justify-content: space-between;\r\n      -webkit-box-align: center;\r\n          -ms-flex-align: center;\r\n              align-items: center;\r\n      padding: 10px;\r\n  \r\n      &__name {\r\n        word-wrap: break-word;\r\n        width: 90%;\r\n      }\r\n  \r\n      &:active {\r\n        cursor: grabbing;\r\n        cursor: -webkit-grabbing;\r\n      }\r\n  \r\n      &__button {\r\n        background: none;\r\n        border: none;\r\n        outline: none;\r\n        cursor: pointer;\r\n      }\r\n    }\r\n  }\r\n\r\n  td, th {\r\n    border: 2px solid $color1;\r\n    @media (max-width: 700px) {\r\n      font-size: 12px;\r\n    }\r\n    @media (max-width: 400px) {\r\n      font-size: 10px;\r\n    }\r\n  }\r\n\r\n  th {\r\n    font-weight: bold;\r\n    font-family: $font1;\r\n    background-color: $color1;\r\n    box-sizing: border-box;\r\n  }\r\n}\r\n\r\n\r\n","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -1214,6 +1403,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, "table {\n  -webkit-box-shadow: 0px 1px
   \************************************************************************************************************************************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1228,7 +1418,7 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_cssWithMappingToString_js__WEBPACK_IMPORTED_MODULE_0___default()));
 ___CSS_LOADER_EXPORT___.push([module.id, "@import url(https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap);"]);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "/*\n* Prefixed by https://autoprefixer.github.io\n* PostCSS: v7.0.29,\n* Autoprefixer: v9.7.6\n* Browsers: last 4 version\n*/\n.calendar-header {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  width: 100%;\n  -webkit-box-pack: justify;\n  -ms-flex-pack: justify;\n  justify-content: space-between;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n}\n.calendar-header__header {\n  font-size: 25px;\n  font-family: \"Lora\", serif;\n}\n.calendar-header__filter {\n  margin-right: 10px;\n  height: 35px;\n  border-radius: 5px;\n  padding: 5px;\n  border: 2px dotted #B9CBC3;\n}\n.calendar-header__button {\n  height: 50%;\n  cursor: pointer;\n  background-color: #B9CBC3;\n  color: #000;\n  border: none;\n  border-radius: 5px;\n  padding: 10px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  outline: none;\n  -webkit-transition: ease 0.1s;\n  -o-transition: ease 0.1s;\n  transition: ease 0.1s;\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}\n.calendar-header__button:hover {\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n}\n.calendar-header__button:active {\n  -webkit-box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}", "",{"version":3,"sources":["webpack://./components/calendarHeader/calendarHeader.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAAA;;;;;CAAA;AASA;EACE,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,WAAA;EACA,yBAAA;EACI,sBAAA;EACI,8BAAA;EACR,yBAAA;EACI,sBAAA;EACI,mBAAA;AADV;AAGE;EACE,eAAA;EACA,0BCjBI;ADgBR;AAIE;EACE,kBAAA;EACA,YAAA;EACA,kBAAA;EACA,YAAA;EACA,0BAAA;AAFJ;AAKE;EACE,WAAA;EACA,eAAA;EACA,yBCnCK;EDoCL,WAAA;EACA,YAAA;EACA,kBAAA;EACA,aAAA;EACA,8BAAA;EACQ,sBAAA;EACR,aAAA;EACA,6BAAA;EACA,wBAAA;EACA,qBAAA;EACA,sDAAA;EACQ,8CAAA;AAHZ;AAII;EACE,sDAAA;EACQ,8CAAA;AAFd;AAII;EACE,4DAAA;EACQ,oDAAA;AAFd","sourcesContent":["/*\r\n* Prefixed by https://autoprefixer.github.io\r\n* PostCSS: v7.0.29,\r\n* Autoprefixer: v9.7.6\r\n* Browsers: last 4 version\r\n*/\r\n\r\n@import '/styles/variables.scss';\r\n\r\n.calendar-header {\r\n  display: -webkit-box;\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  width: 100%;\r\n  -webkit-box-pack: justify;\r\n      -ms-flex-pack: justify;\r\n          justify-content: space-between;\r\n  -webkit-box-align: center;\r\n      -ms-flex-align: center;\r\n          align-items: center;\r\n\r\n  &__header {\r\n    font-size: 25px;\r\n    font-family: $font1;\r\n  }\r\n\r\n  &__filter {\r\n    margin-right: 10px;\r\n    height: 35px;\r\n    border-radius: 5px;\r\n    padding: 5px;\r\n    border: 2px dotted $color1;\r\n  }\r\n\r\n  &__button {\r\n    height: 50%;\r\n    cursor: pointer;\r\n    background-color: $color1;\r\n    color: #000;\r\n    border: none;\r\n    border-radius: 5px;\r\n    padding: 10px;\r\n    -webkit-box-sizing: border-box;\r\n            box-sizing: border-box;\r\n    outline: none;\r\n    -webkit-transition: ease 0.1s;\r\n    -o-transition: ease 0.1s;\r\n    transition: ease 0.1s;\r\n    -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n            box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n    &:hover {\r\n      -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n              box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n    }\r\n    &:active {\r\n      -webkit-box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n              box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n    }\r\n  }\r\n}","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, "/*\n* Prefixed by https://autoprefixer.github.io\n* PostCSS: v7.0.29,\n* Autoprefixer: v9.7.6\n* Browsers: last 4 version\n*/\n.calendar-header {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  width: 100%;\n  -webkit-box-pack: justify;\n  -ms-flex-pack: justify;\n  justify-content: space-between;\n  -webkit-box-align: center;\n  -ms-flex-align: center;\n  align-items: center;\n}\n.calendar-header__header {\n  font-size: 25px;\n  font-family: \"Lora\", serif;\n}\n.calendar-header__filter {\n  margin-right: 10px;\n  height: 35px;\n  border-radius: 5px;\n  padding: 5px;\n  border: 2px dotted #B9CBC3;\n  outline: none;\n}\n.calendar-header__button {\n  height: 50%;\n  cursor: pointer;\n  background-color: #B9CBC3;\n  color: #000;\n  border: none;\n  border-radius: 5px;\n  padding: 10px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  outline: none;\n  -webkit-transition: ease 0.1s;\n  -o-transition: ease 0.1s;\n  transition: ease 0.1s;\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}\n.calendar-header__button:hover {\n  -webkit-box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);\n}\n.calendar-header__button:active {\n  -webkit-box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.3);\n}", "",{"version":3,"sources":["webpack://./components/calendarHeader/calendarHeader.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAAA;;;;;CAAA;AASA;EACE,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,WAAA;EACA,yBAAA;EACI,sBAAA;EACI,8BAAA;EACR,yBAAA;EACI,sBAAA;EACI,mBAAA;AADV;AAGE;EACE,eAAA;EACA,0BCjBI;ADgBR;AAIE;EACE,kBAAA;EACA,YAAA;EACA,kBAAA;EACA,YAAA;EACA,0BAAA;EACA,aAAA;AAFJ;AAKE;EACE,WAAA;EACA,eAAA;EACA,yBCpCK;EDqCL,WAAA;EACA,YAAA;EACA,kBAAA;EACA,aAAA;EACA,8BAAA;EACQ,sBAAA;EACR,aAAA;EACA,6BAAA;EACA,wBAAA;EACA,qBAAA;EACA,sDAAA;EACQ,8CAAA;AAHZ;AAII;EACE,sDAAA;EACQ,8CAAA;AAFd;AAII;EACE,4DAAA;EACQ,oDAAA;AAFd","sourcesContent":["/*\r\n* Prefixed by https://autoprefixer.github.io\r\n* PostCSS: v7.0.29,\r\n* Autoprefixer: v9.7.6\r\n* Browsers: last 4 version\r\n*/\r\n\r\n@import '/styles/variables.scss';\r\n\r\n.calendar-header {\r\n  display: -webkit-box;\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  width: 100%;\r\n  -webkit-box-pack: justify;\r\n      -ms-flex-pack: justify;\r\n          justify-content: space-between;\r\n  -webkit-box-align: center;\r\n      -ms-flex-align: center;\r\n          align-items: center;\r\n\r\n  &__header {\r\n    font-size: 25px;\r\n    font-family: $font1;\r\n  }\r\n\r\n  &__filter {\r\n    margin-right: 10px;\r\n    height: 35px;\r\n    border-radius: 5px;\r\n    padding: 5px;\r\n    border: 2px dotted $color1;\r\n    outline: none;\r\n  }\r\n\r\n  &__button {\r\n    height: 50%;\r\n    cursor: pointer;\r\n    background-color: $color1;\r\n    color: #000;\r\n    border: none;\r\n    border-radius: 5px;\r\n    padding: 10px;\r\n    -webkit-box-sizing: border-box;\r\n            box-sizing: border-box;\r\n    outline: none;\r\n    -webkit-transition: ease 0.1s;\r\n    -o-transition: ease 0.1s;\r\n    transition: ease 0.1s;\r\n    -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n            box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.3);\r\n    &:hover {\r\n      -webkit-box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n              box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.5);\r\n    }\r\n    &:active {\r\n      -webkit-box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n              box-shadow: inset  0px 1px 3px 0px rgba(0,0,0,0.3);\r\n    }\r\n  }\r\n}","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -1241,6 +1431,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, "/*\n* Prefixed by https://autoprefixer
   \************************************************************************************************************************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1268,6 +1459,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, "/*\n* Prefixed by https://autoprefixer
   \******************************************************************************************************************************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1295,6 +1487,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, "/*\n* Prefixed by https://autoprefixer
   \**************************************************************************************************************************************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1315,7 +1508,7 @@ var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBP
 ___CSS_LOADER_EXPORT___.push([module.id, "@import url(https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap);"]);
 var ___CSS_LOADER_URL_REPLACEMENT_0___ = _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(_assets_arrowDown_png__WEBPACK_IMPORTED_MODULE_3__.default);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".select-multiply {\n  z-index: 1;\n  width: 100%;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n.select-multiply.open .select-multiply__dropdown {\n  display: flex;\n}\n.select-multiply.open .select-multiply__input {\n  border-bottom: none;\n}\n.select-multiply__dropdown {\n  display: none;\n  flex-direction: column;\n  position: fixed;\n  border: 1px solid #ccc;\n  border-radius: 5px;\n  width: 315px;\n  margin: 0px;\n  margin-top: 200px;\n  background-color: #fff;\n  max-height: 200px;\n  overflow-y: auto;\n  box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.3);\n}\n.select-multiply__dropdown-item {\n  z-index: 100;\n  width: 100%;\n  height: 35px;\n  margin: 0;\n  line-height: 35px;\n  padding-left: 10px;\n  box-sizing: border-box;\n}\n.select-multiply__dropdown-item:hover {\n  background-color: #eee;\n  cursor: pointer;\n  transition: 0.15s background-color ease-in;\n}\n.select-multiply__dropdown-item.selected {\n  background-color: #f7f6e7;\n}\n.select-multiply::after {\n  background-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\n  background-size: 10px;\n  background-repeat: no-repeat;\n  display: inline-block;\n  width: 10px;\n  height: 8px;\n  margin-right: 5px;\n  content: \"\";\n}\n.select-multiply slot {\n  display: none;\n}\n.select-multiply li {\n  list-style: none;\n}", "",{"version":3,"sources":["webpack://./components/selectComponent/selectComponent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAGA;EAEE,UAAA;EA+CE,WAAA;EACA,aAAA;EACA,mBAAA;EACA,8BAAA;AAhDJ;AACI;EACE,aAAA;AACN;AAEI;EACE,mBAAA;AAAN;AAIE;EACE,aAAA;EACA,sBAAA;EACA,eAAA;EACA,sBAAA;EACA,kBAAA;EACA,YAAA;EACA,WAAA;EACA,iBAAA;EACA,sBAAA;EAEA,iBAAA;EACA,gBAAA;EACA,0CAAA;AAHJ;AAKI;EACE,YAAA;EACA,WAAA;EACA,YAAA;EACA,SAAA;EACA,iBAAA;EACA,kBAAA;EACA,sBAAA;AAHN;AAIM;EACE,sBAAA;EACA,eAAA;EACA,0CAAA;AAFR;AAKM;EACE,yBC5CC;ADyCT;AAYI;EACE,yDAAA;EACA,qBAAA;EACA,4BAAA;EACA,qBAAA;EACA,WAAA;EACA,WAAA;EACA,iBAAA;EACA,WAAA;AAVN;AAYI;EACE,aAAA;AAVN;AAaI;EACI,gBAAA;AAXR","sourcesContent":["@import '/styles/variables.scss';\r\n// @charset \"utf-8\"; \r\n\r\n.select-multiply {\r\n  $root: &;\r\n  z-index: 1;\r\n\r\n  &.open {\r\n    #{$root}__dropdown {\r\n      display: flex;\r\n    }\r\n\r\n    #{$root}__input {\r\n      border-bottom: none;\r\n    }\r\n  }\r\n\r\n  &__dropdown {\r\n    display: none;\r\n    flex-direction: column;\r\n    position: fixed;\r\n    border: 1px solid #ccc;\r\n    border-radius: 5px;\r\n    width: 315px;\r\n    margin: 0px;\r\n    margin-top: 200px;\r\n    background-color: #fff;\r\n    \r\n    max-height: 200px;\r\n    overflow-y: auto;\r\n    box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.3);\r\n\r\n    &-item {\r\n      z-index: 100;\r\n      width: 100%;\r\n      height: 35px;\r\n      margin: 0;\r\n      line-height: 35px;\r\n      padding-left: 10px;\r\n      box-sizing: border-box;\r\n      &:hover {\r\n        background-color: #eee;\r\n        cursor: pointer;\r\n        transition: 0.15s background-color ease-in;\r\n      }\r\n\r\n      &.selected {\r\n        background-color: $color2;\r\n      }\r\n    }\r\n  }\r\n\r\n    width: 100%;\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: space-between;\r\n    &::after {\r\n      background-image: url('/assets/arrowDown.png');\r\n      background-size: 10px;\r\n      background-repeat: no-repeat;\r\n      display: inline-block;\r\n      width: 10px; \r\n      height: 8px;\r\n      margin-right: 5px;\r\n      content: '';\r\n    }\r\n    slot {\r\n      display: none;\r\n    }\r\n\r\n    li {\r\n        list-style: none;\r\n    }\r\n  }\r\n","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".select-multiply {\n  z-index: 1;\n  padding: 0 !important;\n  width: 100%;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n  -ms-flex-pack: justify;\n  justify-content: space-between;\n}\n.select-multiply.open .select-multiply__dropdown {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n}\n.select-multiply.open .select-multiply__input {\n  border-bottom: none;\n}\n.select-multiply__value {\n  padding-left: 10px;\n  line-height: 1em;\n  margin-top: auto;\n  margin-bottom: auto;\n}\n.select-multiply__dropdown {\n  display: none;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n  -ms-flex-direction: column;\n  flex-direction: column;\n  position: fixed;\n  border: 1px solid #ccc;\n  border-radius: 5px;\n  width: 315px;\n  margin-top: 35px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n  background-color: #fff;\n  max-height: 200px;\n  overflow-y: auto;\n  -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.3);\n  box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.3);\n}\n.select-multiply__dropdown-item {\n  z-index: 100;\n  width: 100%;\n  height: 35px;\n  margin: 0;\n  line-height: 35px;\n  padding-left: 10px;\n  -webkit-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.select-multiply__dropdown-item:hover {\n  background-color: #eee;\n  cursor: pointer;\n  -webkit-transition: 0.15s background-color ease-in;\n  -o-transition: 0.15s background-color ease-in;\n  transition: 0.15s background-color ease-in;\n}\n.select-multiply__dropdown-item.selected {\n  background-color: #f7f6e7;\n}\n.select-multiply::after {\n  -ms-flex-item-align: center;\n  -ms-grid-row-align: center;\n  align-self: center;\n  background-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\n  background-size: 10px;\n  background-repeat: no-repeat;\n  display: inline-block;\n  width: 10px;\n  height: 8px;\n  margin-right: 5px;\n  content: \"\";\n}\n.select-multiply slot {\n  display: none;\n}\n.select-multiply li {\n  list-style: none;\n}", "",{"version":3,"sources":["webpack://./components/selectComponent/selectComponent.scss","webpack://./styles/variables.scss"],"names":[],"mappings":"AAEA;EAEE,UAAA;EACA,qBAAA;EAgEE,WAAA;EACA,oBAAA;EACA,oBAAA;EACA,aAAA;EACA,yBAAA;EACA,sBAAA;EACQ,8BAAA;AAhEZ;AAHI;EACE,oBAAA;EACA,oBAAA;EACA,aAAA;AAKN;AAFI;EACE,mBAAA;AAIN;AAAE;EACE,kBAAA;EACA,gBAAA;EACA,gBAAA;EACA,mBAAA;AAEJ;AACE;EACE,aAAA;EACA,4BAAA;EACA,6BAAA;EACI,0BAAA;EACI,sBAAA;EACR,eAAA;EACA,sBAAA;EACA,kBAAA;EACA,YAAA;EACA,gBAAA;EACA,8BAAA;EACQ,sBAAA;EACR,sBAAA;EAEA,iBAAA;EACA,gBAAA;EACA,kDAAA;EACQ,0CAAA;AAAZ;AAEI;EACE,YAAA;EACA,WAAA;EACA,YAAA;EACA,SAAA;EACA,iBAAA;EACA,kBAAA;EACA,8BAAA;EACQ,sBAAA;AAAd;AACM;EACE,sBAAA;EACA,eAAA;EACA,kDAAA;EACA,6CAAA;EACA,0CAAA;AACR;AAEM;EACE,yBC7DC;AD6DT;AAYI;EACE,2BAAA;EACI,0BAAA;EACA,kBAAA;EACJ,yDAAA;EACA,qBAAA;EACA,4BAAA;EACA,qBAAA;EACA,WAAA;EACA,WAAA;EACA,iBAAA;EACA,WAAA;AAVN;AAYI;EACE,aAAA;AAVN;AAaI;EACI,gBAAA;AAXR","sourcesContent":["@import '/styles/variables.scss';\r\n\r\n.select-multiply {\r\n  $root: &;\r\n  z-index: 1;\r\n  padding: 0!important;\r\n\r\n  &.open {\r\n    #{$root}__dropdown {\r\n      display: -webkit-box;      \r\n      display: -ms-flexbox;      \r\n      display: flex;    \r\n    }\r\n\r\n    #{$root}__input {\r\n      border-bottom: none;\r\n    }\r\n  }\r\n\r\n  &__value {\r\n    padding-left: 10px;\r\n    line-height: 1em;\r\n    margin-top: auto;\r\n    margin-bottom: auto;\r\n  }\r\n\r\n  &__dropdown {\r\n    display: none;\r\n    -webkit-box-orient: vertical;\r\n    -webkit-box-direction: normal;\r\n        -ms-flex-direction: column;\r\n            flex-direction: column;\r\n    position: fixed;\r\n    border: 1px solid #ccc;\r\n    border-radius: 5px;\r\n    width: 315px;\r\n    margin-top: 35px;\r\n    -webkit-box-sizing: border-box;\r\n            box-sizing: border-box;\r\n    background-color: #fff;\r\n    \r\n    max-height: 200px;\r\n    overflow-y: auto;\r\n    -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.3);\r\n            box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.3);\r\n\r\n    &-item {\r\n      z-index: 100;\r\n      width: 100%;\r\n      height: 35px;\r\n      margin: 0;\r\n      line-height: 35px;\r\n      padding-left: 10px;\r\n      -webkit-box-sizing: border-box;\r\n              box-sizing: border-box;\r\n      &:hover {\r\n        background-color: #eee;\r\n        cursor: pointer;\r\n        -webkit-transition: 0.15s background-color ease-in;\r\n        -o-transition: 0.15s background-color ease-in;\r\n        transition: 0.15s background-color ease-in;\r\n      }\r\n\r\n      &.selected {\r\n        background-color: $color2;\r\n      }\r\n    }\r\n  }\r\n\r\n    width: 100%;\r\n    display: -webkit-box;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -webkit-box-pack: justify;\r\n    -ms-flex-pack: justify;\r\n            justify-content: space-between;\r\n    &::after {\r\n      -ms-flex-item-align: center;\r\n          -ms-grid-row-align: center;\r\n          align-self: center;\r\n      background-image: url('/assets/arrowDown.png');\r\n      background-size: 10px;\r\n      background-repeat: no-repeat;\r\n      display: inline-block;\r\n      width: 10px; \r\n      height: 8px;\r\n      margin-right: 5px;\r\n      content: '';\r\n    }\r\n    slot {\r\n      display: none;\r\n    }\r\n\r\n    li {\r\n        list-style: none;\r\n    }\r\n  }\r\n","@import url('https://fonts.googleapis.com/css2?family=Lora&family=Roboto&display=swap');\r\n\r\n$color1: #B9CBC3;\r\n$color2: #f7f6e7;\r\n$color3: #314e52;\r\n\r\n$font1: 'Lora', serif;\r\n$font2: 'Roboto', sans-serif;\r\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -1328,6 +1521,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, ".select-multiply {\n  z-index: 1;\n  w
   \*******************************************************************************************************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1355,6 +1549,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, "#main {\n  width: 90vw;\n  margin: aut
   \*****************************************************/
 /***/ ((module) => {
 
+"use strict";
 
 
 /*
@@ -1430,6 +1625,7 @@ module.exports = function (cssWithMappingToString) {
   \************************************************************************/
 /***/ ((module) => {
 
+"use strict";
 
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
@@ -1471,6 +1667,7 @@ module.exports = function cssWithMappingToString(item) {
   \********************************************************/
 /***/ ((module) => {
 
+"use strict";
 
 
 module.exports = function (url, options) {
@@ -1514,6 +1711,7 @@ module.exports = function (url, options) {
   \******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1528,6 +1726,7 @@ __webpack_require__.r(__webpack_exports__);
   \*************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1557,6 +1756,7 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
   \*******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1586,6 +1786,7 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
   \*******************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1615,6 +1816,7 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
   \*************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1644,6 +1846,7 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1673,6 +1876,7 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
   \**************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1702,6 +1906,7 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
   \****************************************************************************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
+"use strict";
 
 
 var isOldIE = function isOldIE() {

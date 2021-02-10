@@ -32,13 +32,13 @@ export function onDrop(event) {
 function putElement(element, dropzone) {
   
   const drop = {};
-  const events = Cookies.getEvents();
+  const events = JSON.parse(Cookies.getCookie('calendar'));
 
-  element.day = element.getAttribute('day');
-  element.time = element.getAttribute('time');
+  element.day = element.dataset.day;
+  element.time = element.dataset.time;
 
-  drop.day = dropzone.getAttribute('day');
-  drop.time = dropzone.getAttribute('time');
+  drop.day = dropzone.dataset.day;
+  drop.time = dropzone.dataset.time;
 
   if (dropzoneCheck(events, drop)) {
     dropzone.appendChild(element);
@@ -48,8 +48,8 @@ function putElement(element, dropzone) {
         item.day = drop.day;
         item.time = drop.time;
       }
-      element.setAttribute('day', drop.day);
-      element.setAttribute('time', drop.time);
+      element.dataset.day = drop.day;
+      element.dataset.time = drop.time;
     });
 
     savePosition(events);
@@ -69,8 +69,7 @@ function dropzoneCheck(events, drop) {
 }
 
 function savePosition(events) {
-  const eventString = JSON.stringify(events).replace('[{', '{').replace('}]', '}');
-  Cookies.setCookie('calendar', eventString);
+  Cookies.setCookie('calendar', JSON.stringify(events));
 }
 
 window.onDragStart = onDragStart;

@@ -1,105 +1,153 @@
-import './calendarComponent.scss';
-import * as WcMixin from '/WcMixin.js';
-import * as Cookies from '/plugins/cookies.js';
-import  '/plugins/draggable.js';
+import "./calendarComponent.scss";
+import * as WcMixin from "../../WcMixin.js";
+import * as Cookies from "../../plugins/cookies.js";
+import * as Data from "../../assets/data.js";
+import "../../plugins/draggable.js";
+import * as EventBus from "../../plugins/eventBus.js";
 
-const me = 'calendar-component';
-const days = [
-  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
-];
+const me = "calendar-component";
+let filter = "All members";
 
 customElements.define(me, class extends HTMLElement {
 
   connectedCallback() {
-    WcMixin.addAdjacentHTML(this, this.createCalendar(10, 18));
-    const _this = this;
+    WcMixin.addAdjacentHTML(this, this.createTable(Data.workingHours.start, Data.workingHours.end));
+    const _this = this; 
 
-    document.querySelector('#filterParticipant').addEventListener('change', (ev) => {
-      _this.fillTable(_this.filterEvents(ev.target.value));
+    document.querySelector("#filterParticipant").addEventListener("change", (ev) => {
+      filter = ev.target.value;
+      _this.fillTable();
     });
 
-    _this.fillTable(Cookies.getEvents());
+    _this.fillTable()
+    
+    EventBus.subscribe("refreshEvents", () => {
+      _this.fillTable();
+    });
+
   }
 
-  createCalendar(start, end) {
-    let table = '<table><tr><th class="row-header">Time</th>';
-    days.forEach((day) => {
-      table += `<th>${day}</th>`;
-    });
-    table += '</tr>';
-    for (let i = start; i <= end; i += 1) {
-      table += `<tr><th class="row-header">${i}:00</th>`;
-      days.forEach((day) => {
-        table += `<td day="${day}" time="${i}" ondragover="onDragOver(event)" ondrop="onDrop(event)"></td>`;
-      });
-      table += '</tr>';
+  createTable(start, end) {
+    let table = document.createElement("table");
+    let tableHeader = document.createElement("tr");
+    let workingDays = Data.workingDays;
+    
+    tableHeader.insertAdjacentHTML("afterbegin", `
+      <th>Time</th>
+    `)
+
+    workingDays.forEach(item => {
+      let th = document.createElement("th");
+
+      th.innerText = item;
+      tableHeader.appendChild(th);
+    })
+    tableHeader.classList.add("table-header");
+    table.appendChild(tableHeader);
+
+    for (var hour = start; hour <= end; hour = hour + 1) {
+      let tr = document.createElement("tr");      
+      let th = document.createElement("th");
+      th.classList.add("row-header");
+      th.innerText = `${hour}:00`;
+      tr.appendChild(th);
+      
+      workingDays.forEach(item => {
+        let td = document.createElement("td");
+
+        td.dataset.day = item;
+        td.dataset.time = hour;
+        td.setAttribute("ondragover", "onDragOver(event)");
+        td.setAttribute("ondrop", "onDrop(event)");
+
+        tr.appendChild(td);
+      })
+
+      table.appendChild(tr);
     }
-    table += '</table>';
-    return table;
+    return table.outerHTML;
   }
 
-  fillTable(events) {
-    console.log(events)
-    const elements = this.querySelectorAll('table tr td');
-    events.forEach((item) => {
-      elements.forEach((elem) => {  
-        if (elem.getAttribute('day') === item.day && elem.getAttribute('time') === item.time) {
-          WcMixin.addAdjacentHTML(elem, `
-            <div class="event-flag" 
-              draggable="true" 
-              ondragstart="onDragStart(event)" 
-              day="${item.day}" 
-              time="${item.time}"
-            >
-              <p class="event-flag__name">${item.name}</p>
-              <button class="event-flag__button">X</button>
-            </div>
-          `);
+  fillTable() {
+    let events = this.filterEvents();
+    if (!events) throw new Error("No events")
+
+    const tableCells = this.querySelectorAll("table tr td");
+
+    events.forEach((event) => {
+      tableCells.forEach((cell) => {  
+        if (cell.dataset.day === event.day && cell.dataset.time === event.time) {
+          let flagElement = document.createElement("div");
+          let flagNameElement = document.createElement("p");
+          let flagButtonElement = document.createElement("button");
+
+          flagElement.classList.add("event-flag");
+          flagElement.draggable = "true";
+          flagElement.setAttribute("ondragstart", "onDragStart(event)");
+          flagElement.dataset.day = event.day;
+          flagElement.dataset.time = event.time;
+
+          flagNameElement.classList.add("event-flag__name");
+          flagNameElement.innerText = event.name;
+
+          flagButtonElement.classList.add("event-flag__button");
+          flagButtonElement.innerText = "X";
+
+          flagElement.appendChild(flagNameElement);
+          flagElement.appendChild(flagButtonElement);
+
+          WcMixin.addAdjacentHTML(cell, flagElement.outerHTML);
         }
       });
     });
+
     this.addRemoveEventListeners();
   }
 
   clearTable() {
-    const flags = document.querySelectorAll('.event-flag');
+    const flags = document.querySelectorAll(".event-flag");
+
     flags.forEach((item) => {
       item.remove();
     });
   }
 
   showRemoveWindow(target) {
-    let main = document.querySelector('#main');
+    let main = document.querySelector("#main");
+    let removeWindow = document.createElement("remove-event");
     let parent = {};
     
     parent.name = target
       .parentElement
-      .querySelector('.event-flag__name')
+      .querySelector(".event-flag__name")
       .textContent;
 
     parent.day = target
       .parentElement
-      .getAttribute('day');
+      .dataset.day;
       
     parent.time = target
       .parentElement
-      .getAttribute('time');
+      .dataset.time;
 
-      main.insertAdjacentHTML('afterbegin', `
-        <remove-event class="remove-event-wrapper" 
-          name="${parent.name}" 
-          day="${parent.day}" 
-          time="${parent.time}"
-        ></remove-event>
-      `)
+      removeWindow.classList.add("remove-event-wrapper");
+      removeWindow.dataset.name = parent.name;
+      removeWindow.dataset.day = parent.day;
+      removeWindow.dataset.time = parent.time;
+
+      main.insertAdjacentElement("afterbegin", removeWindow);
   }
 
-  filterEvents(value) {
+  filterEvents() {
+    let value = filter;
     this.clearTable();
-    const events = Cookies.getEvents();
+
+    const cookies = Cookies.getCookie("calendar");
+    const events = cookies !== undefined ? JSON.parse(cookies) : [];
     let result = [];
-    if (value !== '') {
-      if (events && events !== 'undefined') {
+
+    if (value !== "All members") {
+      if (events && events !== "undefined") {
         events.forEach((item) => {
           if (item.participants.includes(value)) {
             result.push(item);
@@ -114,9 +162,10 @@ customElements.define(me, class extends HTMLElement {
 
   addRemoveEventListeners() {
     const _this = this;
-    const buttons = this.querySelectorAll('.event-flag__button');
+    const buttons = this.querySelectorAll(".event-flag__button");
+
     buttons.forEach((button) => {
-      button.addEventListener('click', (e) => {
+      button.addEventListener("click", (e) => {
         _this.showRemoveWindow(e.target);
       });
     });

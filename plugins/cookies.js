@@ -12,12 +12,3 @@ export function getCookie(key) {
 export function deleteCookie(key) {
   document.cookie = `${key}=; Max-Age=0`;
 }
-
-export function getEvents() {
-  const replaced = getCookie('calendar').replaceAll('},', '}},');
-  const events = replaced.split('},');
-  events.forEach((item, index) => {
-    events[index] = JSON.parse(item);
-  });
-  return events;
-}

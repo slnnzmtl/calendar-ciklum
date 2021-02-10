@@ -1,9 +1,9 @@
-import * as WcMixin from '/WcMixin.js';
-import './calendarHeader.scss';
+import * as WcMixin from "/WcMixin.js";
+import * as Data from "../../assets/data";
 
-const me = 'calendar-header';
+import "./calendarHeader.scss";
 
-customElements.define(me, class extends HTMLElement {
+customElements.define("calendar-header", class extends HTMLElement {
 
   connectedCallback() {
     WcMixin.addAdjacentHTML(this, `
@@ -12,26 +12,40 @@ customElements.define(me, class extends HTMLElement {
         <select 
           class="calendar-header__filter"
           w-id="filterParticipant/participant"    
-        >
-          <option value="" selected>All members</option>
-          <option value="John">John</option>
-          <option value="Eddard">Eddard</option>
-          <option value="Robbert">Robbert</option>
-          <option value="Jaime">Jaime</option>
-          <option value="Cersei">Cersei</option>
-        </select>
+        ></select>
         <button w-id="buttonElem/button" class="calendar-header__button">New Event+</button>
       </div>
     `);
+
+    this.filterParticipant.appendChild(this.getParticipants(Data.participants));
+    console.log(this.getParticipants(Data.participants));
 
     this.buttonElem.onclick = () => this.newEvent();
   }
 
   newEvent() {
-    let main = document.querySelector('#main');
+    let main = document.querySelector("#main");
+    let containerElement = document.createElement('new-event');
+    containerElement.classList.add('new-event-container');
 
-    main.insertAdjacentHTML('afterbegin', `
-      <new-event class="new-event-container"></new-event>
-    `)
+    main.appendChild(containerElement);
+  }
+
+  getParticipants(array) {
+    const template = document.createDocumentFragment();
+    let allMembersOption = document.createElement('option');
+
+    allMembersOption.innerText = "All members";
+    template.appendChild(allMembersOption);
+
+    array.forEach((item) => {
+      let option = document.createElement("option");
+      option.dataset.name = item;
+      option.innerText = item;
+
+      template.appendChild(option);
+    });
+
+    return template;
   }
 });
