@@ -16,7 +16,7 @@ customElements.define("select-multiply", class extends HTMLElement {
         w-id="dropdownList/dropdownListValue">
           <p class="select-multiply__dropdown-item" 
             w-id="selectAll/selectAllValue" 
-            value="all"
+            data-value="all"
             >Select All
           </p>
       </div>

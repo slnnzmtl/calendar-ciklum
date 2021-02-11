@@ -13,21 +13,20 @@ customElements.define(me, class extends HTMLElement {
   connectedCallback() {
     WcMixin.addAdjacentHTML(this, this.createTable(Data.workingHours.start, Data.workingHours.end));
     const _this = this; 
-
-    document.querySelector("#filterParticipant").addEventListener("change", (ev) => {
-      filter = ev.target.value;
+    
+    EventBus.subscribe("participantFilterChanged", value => {
+      filter = value;
       _this.fillTable();
     });
-
-    _this.fillTable()
-    
+  
     EventBus.subscribe("refreshEvents", () => {
       _this.fillTable();
     });
 
+    _this.fillTable()
   }
 
-  createTable(start, end) {
+  createTable(startTime, endTime) {
     let table = document.createElement("table");
     let tableHeader = document.createElement("tr");
     let workingDays = Data.workingDays;
@@ -45,7 +44,7 @@ customElements.define(me, class extends HTMLElement {
     tableHeader.classList.add("table-header");
     table.appendChild(tableHeader);
 
-    for (var hour = start; hour <= end; hour = hour + 1) {
+    for (var hour = startTime; hour <= endTime; hour = hour + 1) {
       let tr = document.createElement("tr");      
       let th = document.createElement("th");
       th.classList.add("row-header");
@@ -69,17 +68,20 @@ customElements.define(me, class extends HTMLElement {
   }
 
   fillTable() {
+    const table = this.querySelector("table");
+    
     let events = this.filterEvents();
-    if (!events) throw new Error("No events")
+    let tableClone = table.cloneNode(true);
+    let tableCells = tableClone.querySelectorAll("tr td");
 
-    const tableCells = this.querySelectorAll("table tr td");
+    if (!events.length) throw new Error("No events")
 
     events.forEach((event) => {
       tableCells.forEach((cell) => {  
         if (cell.dataset.day === event.day && cell.dataset.time === event.time) {
           let flagElement = document.createElement("div");
-          let flagNameElement = document.createElement("p");
-          let flagButtonElement = document.createElement("button");
+          let flagElementName = document.createElement("p");
+          let flagElementButton = document.createElement("button");
 
           flagElement.classList.add("event-flag");
           flagElement.draggable = "true";
@@ -87,21 +89,23 @@ customElements.define(me, class extends HTMLElement {
           flagElement.dataset.day = event.day;
           flagElement.dataset.time = event.time;
 
-          flagNameElement.classList.add("event-flag__name");
-          flagNameElement.innerText = event.name;
+          flagElementName.classList.add("event-flag__name");
+          flagElementName.innerText = event.name;
 
-          flagButtonElement.classList.add("event-flag__button");
-          flagButtonElement.innerText = "X";
+          flagElementButton.classList.add("event-flag__button");
+          flagElementButton.innerText = "X";
 
-          flagElement.appendChild(flagNameElement);
-          flagElement.appendChild(flagButtonElement);
+          flagElement.appendChild(flagElementName);
+          flagElement.appendChild(flagElementButton);
 
-          WcMixin.addAdjacentHTML(cell, flagElement.outerHTML);
+          cell.insertAdjacentElement('afterbegin', flagElement);
         }
       });
     });
 
+    table.replaceWith(tableClone);
     this.addRemoveEventListeners();
+    return table;
   }
 
   clearTable() {
@@ -135,12 +139,15 @@ customElements.define(me, class extends HTMLElement {
       removeWindow.dataset.day = parent.day;
       removeWindow.dataset.time = parent.time;
 
+      console.log(removeWindow)
+
       main.insertAdjacentElement("afterbegin", removeWindow);
   }
 
   filterEvents() {
     let value = filter;
     this.clearTable();
+    console.log('filter')
 
     const cookies = Cookies.getCookie("calendar");
     const events = cookies !== undefined ? JSON.parse(cookies) : [];

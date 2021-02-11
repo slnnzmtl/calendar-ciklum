@@ -18,7 +18,6 @@ function subscribe(eventType, callback) {
 }
 
 function publish(eventType, arg) {
-    console.log(eventType)
     if(!subscriptions[eventType])
         return
 

@@ -481,8 +481,8 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
 
       var _this = this;
 
-      document.querySelector("#filterParticipant").addEventListener("change", function (ev) {
-        filter = ev.target.value;
+      _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_5__.subscribe("participantFilterChanged", function (value) {
+        filter = value;
 
         _this.fillTable();
       });
@@ -495,7 +495,7 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
     }
   }, {
     key: "createTable",
-    value: function createTable(start, end) {
+    value: function createTable(startTime, endTime) {
       var table = document.createElement("table");
       var tableHeader = document.createElement("tr");
       var workingDays = _assets_data_js__WEBPACK_IMPORTED_MODULE_3__.workingDays;
@@ -525,7 +525,7 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
         table.appendChild(tr);
       };
 
-      for (var hour = start; hour <= end; hour = hour + 1) {
+      for (var hour = startTime; hour <= endTime; hour = hour + 1) {
         _loop();
       }
 
@@ -551,7 +551,11 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
             flagNameElement.classList.add("event-flag__name");
             flagNameElement.innerText = event.name;
             flagButtonElement.classList.add("event-flag__button");
-            flagButtonElement.innerText = "X";
+            flagButtonElement.innerText = "X"; // flagButtonElement.addEventListener("click", (e) => {
+            //   console.log('remove')
+            //   this.showRemoveWindow(e.target);
+            // });
+
             flagElement.appendChild(flagNameElement);
             flagElement.appendChild(flagButtonElement);
             _WcMixin_js__WEBPACK_IMPORTED_MODULE_1__.addAdjacentHTML(cell, flagElement.outerHTML);
@@ -581,6 +585,7 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
       removeWindow.dataset.name = parent.name;
       removeWindow.dataset.day = parent.day;
       removeWindow.dataset.time = parent.time;
+      console.log(removeWindow);
       main.insertAdjacentElement("afterbegin", removeWindow);
     }
   }, {
@@ -635,7 +640,9 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../WcMixin.js */ "./WcMixin.js");
 /* harmony import */ var _assets_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../assets/data */ "./assets/data.js");
-/* harmony import */ var _calendarHeader_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./calendarHeader.scss */ "./components/calendarHeader/calendarHeader.scss");
+/* harmony import */ var _plugins_eventBus__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../plugins/eventBus */ "./plugins/eventBus.js");
+/* harmony import */ var _plugins_eventBus__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_plugins_eventBus__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _calendarHeader_scss__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./calendarHeader.scss */ "./components/calendarHeader/calendarHeader.scss");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -667,6 +674,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
+
 customElements.define("calendar-header", /*#__PURE__*/function (_HTMLElement) {
   _inherits(_class, _HTMLElement);
 
@@ -685,7 +693,10 @@ customElements.define("calendar-header", /*#__PURE__*/function (_HTMLElement) {
 
       _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <h1 class=\"calendar-header__header\">Calendar</h1>\n      <div class=\"calendar-header__options\">\n        <select \n          class=\"calendar-header__filter\"\n          w-id=\"filterParticipant/participant\"    \n        ></select>\n        <button w-id=\"buttonElem/button\" class=\"calendar-header__button\">New Event+</button>\n      </div>\n    ");
       this.filterParticipant.appendChild(this.getParticipants(_assets_data__WEBPACK_IMPORTED_MODULE_1__.participants));
-      console.log(this.getParticipants(_assets_data__WEBPACK_IMPORTED_MODULE_1__.participants));
+
+      this.filterParticipant.onchange = function () {
+        return (0,_plugins_eventBus__WEBPACK_IMPORTED_MODULE_2__.publish)("participantFilterChanged", _this.participant);
+      };
 
       this.buttonElem.onclick = function () {
         return _this.newEvent();
@@ -992,7 +1003,7 @@ customElements.define('remove-event', /*#__PURE__*/function (_HTMLElement) {
     value: function connectedCallback() {
       var _this2 = this;
 
-      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n    <div class=\"remove-event\">\n      <p class=\"remove-event__title\">Are you sure you want to delete \xAB".concat(this.getAttribute('name'), "\xBB event?</p>\n      <div class=\"remove-event__buttons\">\n        <button class=\"remove-event__button\" w-id=\"buttonYes/yes\">Yes</button>\n        <button class=\"remove-event__button\" w-id=\"buttonNo/no\">No</button\n      </div>\n    </div>\n    "));
+      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n    <div class=\"remove-event\">\n      <p class=\"remove-event__title\">Are you sure you want to delete \xAB".concat(this.dataset.name, "\xBB event?</p>\n      <div class=\"remove-event__buttons\">\n        <button class=\"remove-event__button\" w-id=\"buttonYes/yes\">Yes</button>\n        <button class=\"remove-event__button\" w-id=\"buttonNo/no\">No</button\n      </div>\n    </div>\n    "));
 
       this.buttonYes.onclick = function () {
         return _this2.removeEvent();
@@ -1009,8 +1020,8 @@ customElements.define('remove-event', /*#__PURE__*/function (_HTMLElement) {
 
       var cookies = _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.getCookie('calendar');
       var events = cookies ? JSON.parse(cookies) : [];
-      var day = this.getAttribute('day');
-      var time = this.getAttribute('time');
+      var day = this.dataset.day;
+      var time = this.dataset.time;
       events.forEach(function (item, index) {
         if (item.day === day && item.time === time) {
           events.splice(index, 1);
@@ -1347,7 +1358,6 @@ function subscribe(eventType, callback) {
 }
 
 function publish(eventType, arg) {
-  console.log(eventType);
   if (!subscriptions[eventType]) return;
   Object.keys(subscriptions[eventType]).forEach(function (key) {
     return subscriptions[eventType][key](arg);

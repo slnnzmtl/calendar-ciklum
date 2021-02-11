@@ -75,7 +75,7 @@ customElements.define("new-event", class extends HTMLElement {
     for (let i = Data.workingHours.start; i <= Data.workingHours.end; i = i + 1) {
 
         let option = document.createElement("option");
-        option.dataset.value = i;
+        option.setAttribute("value", i);
         option.innerText = `${i}:00`;
 
         this.inputTime.appendChild(option);
@@ -116,8 +116,7 @@ customElements.define("new-event", class extends HTMLElement {
           events[0] = object;
           Cookies.setCookie("calendar", JSON.stringify(events));
         }
-        
-        EventBus.publish("refreshEvents");
+
         object = {};
         this.closeTab();
       }
@@ -171,6 +170,7 @@ customElements.define("new-event", class extends HTMLElement {
   }
 
   closeTab() {
+    EventBus.publish("refreshEvents");
     EventBus.publish("resetForm");
     this.remove();
   }

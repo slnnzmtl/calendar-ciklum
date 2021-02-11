@@ -1,5 +1,6 @@
 import * as WcMixin from "/WcMixin.js";
 import * as Data from "../../assets/data";
+import {publish} from "../../plugins/eventBus";
 
 import "./calendarHeader.scss";
 
@@ -18,14 +19,14 @@ customElements.define("calendar-header", class extends HTMLElement {
     `);
 
     this.filterParticipant.appendChild(this.getParticipants(Data.participants));
-    console.log(this.getParticipants(Data.participants));
+    this.filterParticipant.onchange = () => publish("participantFilterChanged", this.participant);
 
     this.buttonElem.onclick = () => this.newEvent();
   }
 
   newEvent() {
     let main = document.querySelector("#main");
-    let containerElement = document.createElement('new-event');
+    let containerElement = document.createElement('new-event'); 
     containerElement.classList.add('new-event-container');
 
     main.appendChild(containerElement);

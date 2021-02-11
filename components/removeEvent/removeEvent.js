@@ -9,7 +9,7 @@ customElements.define('remove-event', class extends HTMLElement {
   connectedCallback() {
     WcMixin.addAdjacentHTML(this, `
     <div class="remove-event">
-      <p class="remove-event__title">Are you sure you want to delete «${this.getAttribute('name')}» event?</p>
+      <p class="remove-event__title">Are you sure you want to delete «${this.dataset.name}» event?</p>
       <div class="remove-event__buttons">
         <button class="remove-event__button" w-id="buttonYes/yes">Yes</button>
         <button class="remove-event__button" w-id="buttonNo/no">No</button
@@ -26,8 +26,8 @@ customElements.define('remove-event', class extends HTMLElement {
     const cookies = Cookies.getCookie('calendar');
     const events = cookies ? JSON.parse(cookies) : [];
     
-    let day = this.getAttribute('day');
-    let time = this.getAttribute('time');
+    let day = this.dataset.day;
+    let time = this.dataset.time;
 
     events.forEach((item, index) => {
       if (item.day === day && item.time === time) {
@@ -40,10 +40,9 @@ customElements.define('remove-event', class extends HTMLElement {
     } else {
       Cookies.deleteCookie('calendar');
     }
-    
-    EventBus.publish("refreshEvents");    
-    _this.closeTab();
 
+    _this.closeTab();
+    EventBus.publish("refreshEvents");    
   }
   closeTab() {
     this.remove();
