@@ -8,8 +8,6 @@
 
 > Calendar for meeting room
 
-### 🏠 [Homepage](slnnzmtl.github.io)
-
 ### ✨ [Demo](slnnzmtl.github.io)
 
 ## Install
@@ -29,10 +27,4 @@ npm run dev for deveopment server run
 👤 **Daniel Kazanskiy**
 
 * Github: [@slnnzmtl](https://github.com/slnnzmtl)
-
-## Show your support
-
-Give a ⭐️ if this project helped you!
-
-***
-_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
+* Telegram: [@slnnzmtl](https://t.me/slnnzmtl)
