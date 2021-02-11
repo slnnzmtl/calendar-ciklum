@@ -8,7 +8,7 @@
 
 > Calendar for meeting room
 
-### ✨ [Demo](slnnzmtl.github.io)
+### ✨ [Demo](https://slnnzmtl.github.io/)
 
 ## Install
 
