@@ -1,31 +1,15 @@
-<head><meta name="viewport" content="width=device-width, initial-scale=1"></head>Html Webpack Plugin:
-<pre>
-  TypeError: The 'compilation' argument must be an instance of Compilation
-  
-  - JavascriptModulesPlugin.js:119 getCompilationHooks
-    [calendar-ciclum]/[webpack]/lib/javascript/JavascriptModulesPlugin.js:119:10
-  
-  - CommonJsChunkFormatPlugin.js:30 
-    [calendar-ciclum]/[webpack]/lib/javascript/CommonJsChunkFormatPlugin.js:30:19
-  
-  
-  - Hook.js:14 Hook.CALL_DELEGATE [as _call]
-    [npm]/[webpack]/[tapable]/lib/Hook.js:14:14
-  
-  - Compiler.js:992 Compiler.newCompilation
-    [npm]/[webpack]/lib/Compiler.js:992:30
-  
-  - Compiler.js:1035 
-    [npm]/[webpack]/lib/Compiler.js:1035:29
-  
-  
-  - Hook.js:18 Hook.CALL_ASYNC_DELEGATE [as _callAsync]
-    [npm]/[webpack]/[tapable]/lib/Hook.js:18:14
-  
-  - Compiler.js:1030 Compiler.compile
-    [npm]/[webpack]/lib/Compiler.js:1030:28
-  
-  - Compiler.js:497 Compiler.runAsChild
-    [npm]/[webpack]/lib/Compiler.js:497:8
-  
-<!-- </pre><script src="bundle.js"></script> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciklum Calendar</title>
+    <!-- <script src="./bundle.js"></scr    ipt> -->
+</head>
+<body>
+    <div id="main">
+        <calendar-header class="calendar-header"></calendar-header>
+        <calendar-component class="calendar"></calendar-component>
+    </div>
+<script src="bundle.js"></script></body>
+</html>

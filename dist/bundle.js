@@ -486,12 +486,11 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
 
         _this.fillTable();
       });
-
-      _this.fillTable();
-
       _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_5__.subscribe("refreshEvents", function () {
         _this.fillTable();
       });
+
+      _this.fillTable();
     }
   }, {
     key: "createTable",
@@ -534,35 +533,35 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
   }, {
     key: "fillTable",
     value: function fillTable() {
+      var table = this.querySelector("table");
       var events = this.filterEvents();
-      if (!events) throw new Error("No events");
-      var tableCells = this.querySelectorAll("table tr td");
+      var tableClone = table.cloneNode(true);
+      var tableCells = tableClone.querySelectorAll("tr td");
+      if (!events.length) throw new Error("No events");
       events.forEach(function (event) {
         tableCells.forEach(function (cell) {
           if (cell.dataset.day === event.day && cell.dataset.time === event.time) {
             var flagElement = document.createElement("div");
-            var flagNameElement = document.createElement("p");
-            var flagButtonElement = document.createElement("button");
+            var flagElementName = document.createElement("p");
+            var flagElementButton = document.createElement("button");
             flagElement.classList.add("event-flag");
             flagElement.draggable = "true";
             flagElement.setAttribute("ondragstart", "onDragStart(event)");
             flagElement.dataset.day = event.day;
             flagElement.dataset.time = event.time;
-            flagNameElement.classList.add("event-flag__name");
-            flagNameElement.innerText = event.name;
-            flagButtonElement.classList.add("event-flag__button");
-            flagButtonElement.innerText = "X"; // flagButtonElement.addEventListener("click", (e) => {
-            //   console.log('remove')
-            //   this.showRemoveWindow(e.target);
-            // });
-
-            flagElement.appendChild(flagNameElement);
-            flagElement.appendChild(flagButtonElement);
-            _WcMixin_js__WEBPACK_IMPORTED_MODULE_1__.addAdjacentHTML(cell, flagElement.outerHTML);
+            flagElementName.classList.add("event-flag__name");
+            flagElementName.innerText = event.name;
+            flagElementButton.classList.add("event-flag__button");
+            flagElementButton.innerText = "X";
+            flagElement.appendChild(flagElementName);
+            flagElement.appendChild(flagElementButton);
+            cell.insertAdjacentElement('afterbegin', flagElement);
           }
         });
       });
+      table.replaceWith(tableClone);
       this.addRemoveEventListeners();
+      return table;
     }
   }, {
     key: "clearTable",
@@ -593,6 +592,7 @@ customElements.define(me, /*#__PURE__*/function (_HTMLElement) {
     value: function filterEvents() {
       var value = filter;
       this.clearTable();
+      console.log('filter');
       var cookies = _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_2__.getCookie("calendar");
       var events = cookies !== undefined ? JSON.parse(cookies) : [];
       var result = [];
@@ -828,7 +828,7 @@ customElements.define("new-event", /*#__PURE__*/function (_HTMLElement) {
 
       for (var i = _assets_data__WEBPACK_IMPORTED_MODULE_3__.workingHours.start; i <= _assets_data__WEBPACK_IMPORTED_MODULE_3__.workingHours.end; i = i + 1) {
         var option = document.createElement("option");
-        option.dataset.value = i;
+        option.setAttribute("value", i);
         option.innerText = "".concat(i, ":00");
         this.inputTime.appendChild(option);
       }
@@ -868,7 +868,6 @@ customElements.define("new-event", /*#__PURE__*/function (_HTMLElement) {
             _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.setCookie("calendar", JSON.stringify(events));
           }
 
-          _plugins_eventBus__WEBPACK_IMPORTED_MODULE_4__.publish("refreshEvents");
           object = {};
           this.closeTab();
         }
@@ -932,6 +931,7 @@ customElements.define("new-event", /*#__PURE__*/function (_HTMLElement) {
   }, {
     key: "closeTab",
     value: function closeTab() {
+      _plugins_eventBus__WEBPACK_IMPORTED_MODULE_4__.publish("refreshEvents");
       _plugins_eventBus__WEBPACK_IMPORTED_MODULE_4__.publish("resetForm");
       this.remove();
     }
@@ -1034,9 +1034,9 @@ customElements.define('remove-event', /*#__PURE__*/function (_HTMLElement) {
         _plugins_cookies_js__WEBPACK_IMPORTED_MODULE_1__.deleteCookie('calendar');
       }
 
-      _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2___default().publish("refreshEvents");
-
       _this.closeTab();
+
+      _plugins_eventBus_js__WEBPACK_IMPORTED_MODULE_2___default().publish("refreshEvents");
     }
   }, {
     key: "closeTab",
@@ -1110,7 +1110,7 @@ customElements.define("select-multiply", /*#__PURE__*/function (_HTMLElement) {
     value: function connectedCallback() {
       var _this2 = this;
 
-      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <p class=\"select-multiply__value\" \n        w-id=\"selectValue/selectValueData\"\n        >Choose members\n      </p>\n      <div class=\"select-multiply__dropdown\" \n        w-id=\"dropdownList/dropdownListValue\">\n          <p class=\"select-multiply__dropdown-item\" \n            w-id=\"selectAll/selectAllValue\" \n            value=\"all\"\n            >Select All\n          </p>\n      </div>\n    ");
+      _WcMixin_js__WEBPACK_IMPORTED_MODULE_0__.addAdjacentHTML(this, "\n      <p class=\"select-multiply__value\" \n        w-id=\"selectValue/selectValueData\"\n        >Choose members\n      </p>\n      <div class=\"select-multiply__dropdown\" \n        w-id=\"dropdownList/dropdownListValue\">\n          <p class=\"select-multiply__dropdown-item\" \n            w-id=\"selectAll/selectAllValue\" \n            data-value=\"all\"\n            >Select All\n          </p>\n      </div>\n    ");
       this.dropdownList.appendChild(this.getList(this));
 
       document.querySelector(".new-event").onclick = function () {
