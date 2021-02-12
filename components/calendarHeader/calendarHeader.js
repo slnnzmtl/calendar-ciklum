@@ -8,7 +8,7 @@ customElements.define("calendar-header", class extends HTMLElement {
 
   connectedCallback() {
     WcMixin.addAdjacentHTML(this, `
-      <h1 class="calendar-header__header">Calendar</h1>
+      <h1 class="calendar-header__header">Room #1</h1>
       <div class="calendar-header__options">
         <select 
           class="calendar-header__filter"
