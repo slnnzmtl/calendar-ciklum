@@ -40,8 +40,9 @@ function putElement(element, dropzone) {
   drop.day = dropzone.dataset.day;
   drop.time = dropzone.dataset.time;
 
-  if (dropzoneCheck(events, drop)) {
+  if (dropzoneCheck(events, dropzone)) {
     dropzone.appendChild(element);
+    console.log(dropzone)
 
     events.forEach((item) => {
       if (item.day === element.day && item.time === element.time) {
@@ -57,15 +58,20 @@ function putElement(element, dropzone) {
 }
 
 function dropzoneCheck(events, drop) {
-  if (drop.day) {
+  let result = 0;
+  if (drop.tagName === "TD") { 
     events.forEach(item => {
-      if (item.day === drop.day && item.time === drop.time) {
-        return false;
+      if (item.day === drop.dataset.day && item.time === drop.dataset.time) {
+        result += 1;
       }
     });
-    return true;
+    
+    if (result > 0) {
+      return false;
+    } else {
+      return true;
+    }
   }
-  return false;
 }
 
 function savePosition(events) {

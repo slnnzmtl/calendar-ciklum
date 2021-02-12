@@ -145,9 +145,8 @@ customElements.define(me, class extends HTMLElement {
   }
 
   filterEvents() {
-    let value = filter;
+    let value = filter === "Choose members" ? "" : filter;
     this.clearTable();
-    console.log('filter')
 
     const cookies = Cookies.getCookie("calendar");
     const events = cookies !== undefined ? JSON.parse(cookies) : [];

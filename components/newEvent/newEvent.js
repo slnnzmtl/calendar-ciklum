@@ -119,6 +119,7 @@ customElements.define("new-event", class extends HTMLElement {
 
         object = {};
         this.closeTab();
+        EventBus.publish("refreshEvents");
       }
     }
   }
@@ -126,11 +127,12 @@ customElements.define("new-event", class extends HTMLElement {
   checkFields(data) {
     this.clearErrors();
     let error = 0;
+    console.log(data)
     if (data.name === "") {
       this.showError("Name cannot be empty.");
       error += 1;
     }
-    if (data.participants.length === 0 || data.participants[0] === "Choose members") {
+    if (data.participants.length === 0 || data.participants[0].includes("Choose members")) {
       this.showError("Please, choose members");
       error += 1;
     }
@@ -170,8 +172,7 @@ customElements.define("new-event", class extends HTMLElement {
   }
 
   closeTab() {
-    EventBus.publish("refreshEvents");
-    EventBus.publish("resetForm");
     this.remove();
+    EventBus.publish("resetForm");
   }
 });
