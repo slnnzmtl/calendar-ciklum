@@ -89,8 +89,8 @@
                       box-shadow: $shadow2;
             }
             &:active {
-              -webkit-box-shadow: inset  $shadow3;
-                      box-shadow: inset  $shadow3;
+              -webkit-box-shadow:  $shadow3;
+                      box-shadow:  $shadow3;
             }
         }
     }

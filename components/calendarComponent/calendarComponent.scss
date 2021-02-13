@@ -80,6 +80,11 @@ table {
         border: none;
         outline: none;
         cursor: pointer;
+        transition: ease 0.1s;
+        &:hover {
+          font-weight: bolder;
+          font-size: 18px;
+        }
         @media (max-width:800px) {
           font-size: 10px;
           margin: 0px;
