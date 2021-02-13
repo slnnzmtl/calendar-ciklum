@@ -98,7 +98,7 @@ customElements.define("select-multiply", class extends HTMLElement {
         selectedItems = [];
       }
     }
-    this.selectValueData = selectedItems.length ? selectedItems.join(", ") : "Choose members";    
+    this.selectValueData = selectedItems.length ? selectedItems.join(",") : "Choose members";    
   }
 
   showDropDown(elem) {
