@@ -1,52 +1,58 @@
-import * as WcMixin from "/WcMixin.js";
-import * as Data from "../../assets/data";
-import {publish} from "../../plugins/eventBus";
+import * as WcMixin from "../../utils/WcMixin.js";
+import { publish } from "../../utils/eventBus";
+import calendarHeader from "./calendarHeader.html";
+import { participants } from "../../assets/data";
+import ComponentsHelper from "../../utils/ComponentsHelper";
+import newEventComponent from "../../components/newEvent/newEvent";
+import * as Cookies from "../../utils/cookies";
 
 import "./calendarHeader.scss";
 
-customElements.define("calendar-header", class extends HTMLElement {
+export default class CalendarHeader extends HTMLElement {
+  constructor() {
+    super();
+
+    this.data = {
+        participants,
+        isAdmin: Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")).isAdmin : "null"
+    };
+  }
 
   connectedCallback() {
-    WcMixin.addAdjacentHTML(this, `
-      <h1 class="calendar-header__header">Meeting Room #1</h1>
-      <div class="calendar-header__options">
-        <select 
-          class="calendar-header__filter"
-          w-id="filterParticipant/participant"    
-        ></select>
-        <button w-id="buttonElem/button" class="calendar-header__button">+</button>
-      </div>
+
+    this.appendChild(ComponentsHelper.parseElement(calendarHeader));
+    this.classList.add("calendar-header");
+
+    this.select = this.querySelector(".calendar-header__filter");
+    this.createButton = this.querySelector(".calendar-header__button");
+    this.logoutButton = this.querySelector(".calendar-header__logout");
+
+    this.createButton.style.display = this.data.isAdmin ? "block" : "none";
+
+    this.select.insertAdjacentHTML("afterbegin", `
+      <option value="All members">All members</option>
     `);
 
-    this.filterParticipant.appendChild(this.getParticipants(Data.participants));
-    this.filterParticipant.onchange = () => publish("participantFilterChanged", this.participant);
+    this.select.onchange = () => publish("participantFilterChanged", this.select.value);
 
-    this.buttonElem.onclick = () => this.newEvent();
+    this.createButton.onclick = () => this.newEvent();
+    this.logoutButton.onclick = () => this.logout();
+    
+    ComponentsHelper.elementMultiplier("option", ["value"], this.select, this.data.participants.map(item => item.name)); 
+
+    this.select.querySelectorAll("option").forEach(item => {
+      item.innerText = item.value;
+    })
+
   }
 
   newEvent() {
     let main = document.querySelector("#main");
-    let containerElement = document.createElement('new-event'); 
-    containerElement.classList.add('new-event-container');
-
-    main.appendChild(containerElement);
+    main.appendChild(new newEventComponent());
   }
 
-  getParticipants(array) {
-    const template = document.createDocumentFragment();
-    let allMembersOption = document.createElement('option');
-
-    allMembersOption.innerText = "All members";
-    template.appendChild(allMembersOption);
-
-    array.forEach((item) => {
-      let option = document.createElement("option");
-      option.dataset.name = item;
-      option.innerText = item;
-
-      template.appendChild(option);
-    });
-
-    return template;
+  logout() {
+    Cookies.deleteCookie("currentUser");
+    publish("logout");
   }
-});
+}

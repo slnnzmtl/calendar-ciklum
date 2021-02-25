@@ -1,100 +1,54 @@
-import * as WcMixin from "../../WcMixin.js";
-import * as Cookies from "../../plugins/cookies.js";
+import * as WcMixin from "../../utils/WcMixin.js";
+import * as Cookies from "../../utils/cookies.js";
+import * as EventBus from "../../utils/eventBus";
+import { participants, workingDays, workingHours } from "../../assets/data";
+import ComponentsHelper from "../../utils/ComponentsHelper";
+import newEvent from "./newEvent.html";
+import selectComponent from "../selectComponent/selectComponent";
+
 import "./newEvent.scss";
-import * as Data from "../../assets/data";
-import * as EventBus from "../../plugins/eventBus";
 
-customElements.define("new-event", class extends HTMLElement {
+export default class NewEvent extends HTMLElement {
+
+  constructor() {
+    super();
+
+        this.data = {
+            participants,
+            days: workingDays,
+            hours: workingHours
+        };
+  }
+
   connectedCallback() {
-    WcMixin.addAdjacentHTML(this, `
-    <div class="new-event">
-      <Label class="new-event__item">
-        Name: 
-        <input autofocus
-          class="new-event__input"
-          w-id="inputName/name"
-        ></input>
-      </Label>
 
-      <Label 
-        class="new-event__item"
-        w-id="participantsLabel/participantsLabelValue"
-      >Members:
-      </Label>
+    this.classList.add("new-event-container");
+    this.appendChild(ComponentsHelper.parseElement(newEvent));
 
-      <Label 
-          class="new-event__item" 
-      >Day:
-        <select 
-          class="new-event__input"
-          w-id="inputDay/day"
-        ></select>
-      </label>
+    this.buttonCancel = this.querySelector(".button-cancel");
+    this.buttonSubmit = this.querySelector(".button-submit");
+    this.participants = this.querySelector("#select-participants");
+    this.days = this.querySelector("#select-days");
+    this.time = this.querySelector("#select-time");
 
-      <Label 
-          class="new-event__item" 
-        >Time:
-          <select 
-            class="new-event__input"
-            w-id="inputTime/time"
-          ></select>
-      </label>
-
-      <div class="new-event__button-wrapper">
-        <button w-id="buttonCreate/create" class="new-event__button">Create</button>
-        <button w-id="buttonCancel/buttonCancelValue" class="new-event__button">Cancel</button>
-      </div>
-    </div>
-  `);
-
-    this.formSetData();
-    this.buttonCreate.onclick = () => this.createEvent();
+    this.buttonSubmit.onclick = () => this.createEvent();
     this.buttonCancel.onclick = () => this.closeTab();
-    window.newEvent = this;
-  }
 
-  formSetData() {
-    const participants = document.createElement("select-multiply");
-    participants.className = "new-event__input select-multiply";
-    participants.id = "select-participants";
-    participants
-      .appendChild(
-        this.getParticipants(Data.participants),
-      );
-    this.participantsLabel
-      .appendChild(participants);
+    let multiSelect = new selectComponent(this.data.participants);
+    this.participants.appendChild(multiSelect);
+    multiSelect.classList.add("new-event__input");
 
-    Data.workingDays.forEach((item) => {
-      let option = document.createElement("option");
-      option.dataset.value = item;
-      option.innerText = item;
 
-      this.inputDay.appendChild(option);
-    });
+    ComponentsHelper.elementMultiplier("option", ["data-value"], this.days, this.data.days)
+    this.days.querySelectorAll("option").forEach(item => {
+      item.innerText = item.dataset.value;
+    })
 
-    for (let i = Data.workingHours.start; i <= Data.workingHours.end; i = i + 1) {
+    ComponentsHelper.elementMultiplier("option", ["data-value"], this.time, this.data.hours) 
+    this.time.querySelectorAll("option").forEach(item => {
+      item.innerText = `${item.dataset.value}:00`;
+    })
 
-        let option = document.createElement("option");
-        option.setAttribute("value", i);
-        option.innerText = `${i}:00`;
-
-        this.inputTime.appendChild(option);
-    }
-  }
-
-  getParticipants(array) {
-    const template = document.createElement("div");
-    template.dataset.name = "template";
-
-    array.forEach((item) => {
-      let slot = document.createElement("slot");
-      slot.dataset.name = item;
-      slot.innerText = item;
-
-      template.appendChild(slot);
-    });
-
-    return template;
   }
 
   createEvent() {
@@ -175,4 +129,37 @@ customElements.define("new-event", class extends HTMLElement {
     this.remove();
     EventBus.publish("resetForm");
   }
-});
+}
+
+
+//   formSetData() {
+//     const participants = document.createElement("select-multiply");
+//     participants.className = "new-event__input select-multiply";
+//     participants.id = "select-participants";
+//     participants
+//       .appendChild(
+//         this.getParticipants(Data.participants),
+//       );
+//     this.participantsLabel
+//       .appendChild(participants);
+
+    
+  // }
+
+//   getParticipants(array) {
+//     const template = document.createElement("div");
+//     template.dataset.name = "template";
+
+//     array.forEach((item) => {
+//       let slot = document.createElement("slot");
+//       slot.dataset.name = item;
+//       slot.innerText = item;
+
+//       template.appendChild(slot);
+//     });
+
+//     return template;
+//   }
+
+
+// });

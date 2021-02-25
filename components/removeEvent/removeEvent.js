@@ -1,6 +1,6 @@
-import * as WcMixin from '/WcMixin.js';
-import * as Cookies from '/plugins/cookies.js';
-import EventBus from "/plugins/eventBus.js";
+import * as WcMixin from '../../utils/WcMixin.js';
+import * as Cookies from '../../utils/cookies.js';
+import EventBus from "../../utils/eventBus.js";
 
 import './removeEvent.scss';
 

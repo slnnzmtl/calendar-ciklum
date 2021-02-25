@@ -1,9 +1,24 @@
 export const participants = [
-  "John", 
-  "Robbert", 
-  "Eddard", 
-  "Jaime", 
-  "Cersei"
+  { 
+    name: "John (Admin)",
+    isAdmin: true
+  }, 
+  { 
+    name: "Robbert",
+    isAdmin: false
+  }, 
+  { 
+    name: "Eddard",
+    isAdmin: false
+  }, 
+  { 
+    name: "Jaime",
+    isAdmin: false
+  }, 
+  { 
+    name: "Cersei",
+    isAdmin: false
+  }
 ]
 
 export const workingDays = [
@@ -14,7 +29,6 @@ export const workingDays = [
   "Friday"
 ]
 
-export const workingHours = {
-  start: 10,
-  end: 18
-}
+export const workingHours = [
+  10, 11, 12, 13, 14, 15, 16, 17, 18
+]

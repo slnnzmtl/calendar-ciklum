@@ -1,18 +1,30 @@
 import "./calendarComponent.scss";
-import * as WcMixin from "../../WcMixin.js";
-import * as Cookies from "../../plugins/cookies.js";
-import * as Data from "../../assets/data.js";
-import "../../plugins/draggable.js";
-import * as EventBus from "../../plugins/eventBus.js";
+import * as WcMixin from "../../utils/WcMixin";
+import * as Cookies from "../../utils/cookies";
+import * as Data from "../../assets/data";
+import "../../utils/draggable";
+import * as EventBus from "../../utils/eventBus";
 
 const me = "calendar-component";
 let filter = "All members";
 
-customElements.define(me, class extends HTMLElement {
+
+
+ export default class calendarComponent extends HTMLElement {
+
+  constructor() {
+    super();
+
+    this.data = {
+      isAdmin: Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")).isAdmin : "null"
+    }
+  }
 
   connectedCallback() {
-    WcMixin.addAdjacentHTML(this, this.createTable(Data.workingHours.start, Data.workingHours.end));
+
+    this.appendChild(this.createTable(Data.workingHours));
     const _this = this; 
+    this.classList.add("calendar");
     
     EventBus.subscribe("participantFilterChanged", value => {
       filter = value;
@@ -26,7 +38,7 @@ customElements.define(me, class extends HTMLElement {
     _this.fillTable()
   }
 
-  createTable(startTime, endTime) {
+  createTable(hours) {
     let table = document.createElement("table");
     let tableHeader = document.createElement("tr");
     let workingDays = Data.workingDays;
@@ -44,7 +56,7 @@ customElements.define(me, class extends HTMLElement {
     tableHeader.classList.add("table-header");
     table.appendChild(tableHeader);
 
-    for (var hour = startTime; hour <= endTime; hour = hour + 1) {
+    hours.forEach((hour) => {
       let tr = document.createElement("tr");      
       let th = document.createElement("th");
       th.classList.add("row-header");
@@ -63,8 +75,9 @@ customElements.define(me, class extends HTMLElement {
       })
 
       table.appendChild(tr);
-    }
-    return table.outerHTML;
+    })
+
+    return table;
   }
 
   fillTable() {
@@ -84,8 +97,10 @@ customElements.define(me, class extends HTMLElement {
           let flagElementButton = document.createElement("button");
 
           flagElement.classList.add("event-flag");
-          flagElement.draggable = "true";
-          flagElement.setAttribute("ondragstart", "onDragStart(event)");
+          if (this.data.isAdmin) {
+            flagElement.draggable = "true";
+            flagElement.setAttribute("ondragstart", "onDragStart(event)");
+          }
           flagElement.dataset.day = event.day;
           flagElement.dataset.time = event.time;
 
@@ -104,7 +119,7 @@ customElements.define(me, class extends HTMLElement {
     });
 
     table.replaceWith(tableClone);
-    this.addRemoveEventListeners();
+    this.removeButtonsAddSettings();
     return table;
   }
 
@@ -166,14 +181,15 @@ customElements.define(me, class extends HTMLElement {
     return result;
   }
 
-  addRemoveEventListeners() {
+  removeButtonsAddSettings() {
     const _this = this;
     const buttons = this.querySelectorAll(".event-flag__button");
 
     buttons.forEach((button) => {
+      button.style.display = this.data.isAdmin ? "block" : "none";
       button.addEventListener("click", (e) => {
         _this.showRemoveWindow(e.target);
       });
     });
   }
-});
+};
