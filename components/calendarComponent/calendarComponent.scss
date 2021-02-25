@@ -34,6 +34,7 @@ table {
     height: 10%;
     padding: 0;
     margin: 0;
+    font-size: 12px!important;
   
     .event-flag {
       color: #000;
@@ -97,6 +98,7 @@ table {
 
   td, th {
     border: 2px solid rgba(166, 211, 190, 0.5);
+    font-size: 14px;
     @media (max-width: 700px) {
       font-size: 12px;
     }

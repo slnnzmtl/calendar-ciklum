@@ -20,7 +20,7 @@ export default class SelectComponent extends HTMLElement {
     this.appendChild(ComponentsHelper.parseElement(selectComponent));
     this.classList.add("select-multiply");
 
-    this.onclick = event => this.showDropDown(this, event); 
+    document.onclick = event => this.showDropDown(this, event); 
     this.selectValue = this.querySelector(".select-multiply__value");
 
     let dropdown = this.querySelector(".select-multiply__dropdown");

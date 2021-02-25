@@ -30,6 +30,7 @@ export default class NewEvent extends HTMLElement {
     this.participants = this.querySelector("#select-participants");
     this.days = this.querySelector("#select-days");
     this.time = this.querySelector("#select-time");
+    this.name = this.querySelector("#name");
 
     this.buttonSubmit.onclick = () => this.createEvent();
     this.buttonCancel.onclick = () => this.closeTab();
@@ -53,10 +54,11 @@ export default class NewEvent extends HTMLElement {
 
   createEvent() {
     let object = {};
-    object.name = this.name;
-    object.day = this.day;
-    object.time = this.time;
-    object.participants = this.querySelector("#select-participants").selectValueData.split(",");
+    object.name = this.name.value;
+    object.day = this.days.value;
+    object.time = this.time.value.split(":")[0];
+    object.participants = this.querySelector(".select-multiply__value").innerText.split(",");
+
 
     if (this.checkFields(object)) {
       const cookies = Cookies.getCookie("calendar");
