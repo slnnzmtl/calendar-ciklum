@@ -1,4 +1,4 @@
-export default class ServerApi {
+class ServerApi {
     constructor() {
         this.systemName = "slnnzmtl";
         this.path = "http://158.101.166.74:8080/api/data/";
@@ -65,3 +65,5 @@ export default class ServerApi {
         })
     }
 }
+
+export default ServerApi;
