@@ -1,50 +1,65 @@
-import * as WcMixin from '../../utils/WcMixin.js';
 import * as Cookies from '../../utils/cookies.js';
 import EventBus from "../../utils/eventBus.js";
+import removeEvent from "./removeEvent.html";
+import ComponentsHelper from "../../utils/ComponentsHelper";
+import Store from "../../utils/store";
 
 import './removeEvent.scss';
 
-customElements.define('remove-event', class extends HTMLElement {
+export default class RemoveEvent extends HTMLElement {
+
+  constructor(options) {
+    super();
+
+    this.classList.add("remove-event-wrapper");
+
+    this.data = {
+      name: options.name,
+      id: options.id
+    }
+  }
   
   connectedCallback() {
-    WcMixin.addAdjacentHTML(this, `
-    <div class="remove-event">
-      <p class="remove-event__title">Are you sure you want to delete «${this.dataset.name}» event?</p>
-      <div class="remove-event__buttons">
-        <button class="remove-event__button" w-id="buttonYes/yes">Yes</button>
-        <button class="remove-event__button" w-id="buttonNo/no">No</button
-      </div>
-    </div>
-    `);
+    this.appendChild(ComponentsHelper.parseElement(removeEvent));
 
-    this.buttonYes.onclick = () => this.removeEvent();
+    this.buttonYes = this.querySelector("#button-yes");
+    this.buttonNo = this.querySelector("#button-no");
+    
+    this.buttonYes.onclick = () => this.removeEvent(this.data.id);
     this.buttonNo.onclick = () => this.closeTab();
+
+    this.eventName = this.querySelector("#event-name");
+    this.eventName.innerText = this.data.name;
   }
 
-  removeEvent() {
-    let _this = this;
-    const cookies = Cookies.getCookie('calendar');
-    const events = cookies ? JSON.parse(cookies) : [];
+  async removeEvent(id) {
     
-    let day = this.dataset.day;
-    let time = this.dataset.time;
+    Store.deleteEvent(id)
+    .then(() => {
+      console.log('deleted');
+    })
+    
+    // const events = await Store.getEvents(); 
+    
+    // let day = this.data.day;
+    // let time = this.data.time;
 
-    events.forEach((item, index) => {
-      if (item.day === day && item.time === time) {
-        events.splice(index, 1);
-      }
-    });
+    // events.forEach((item, index) => {
+    //   if (item.day === day && item.time === time) {
+    //     events.splice(index, 1);
+    //   }
+    // });
 
-    if (events.length > 0) {
-      Cookies.setCookie('calendar', JSON.stringify(events));
-    } else {
-      Cookies.deleteCookie('calendar');
-    }
+    // if (events.length > 0) {
+    //   Cookies.setCookie('calendar', JSON.stringify(events));
+    // } else {
+    //   Cookies.deleteCookie('calendar');
+    // }
 
-    _this.closeTab();
+    this.closeTab();
     EventBus.publish("refreshEvents");    
   }
   closeTab() {
     this.remove();
   }
-});
+};

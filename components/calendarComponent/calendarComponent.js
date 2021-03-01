@@ -1,14 +1,13 @@
 import "./calendarComponent.scss";
-import * as WcMixin from "../../utils/WcMixin";
 import * as Cookies from "../../utils/cookies";
 import * as Data from "../../assets/data";
 import "../../utils/draggable";
 import * as EventBus from "../../utils/eventBus";
+import removeEvent from "../removeEvent/removeEvent";
+import Store from "../../utils/store";
 
 const me = "calendar-component";
 let filter = "All members";
-
-
 
  export default class calendarComponent extends HTMLElement {
 
@@ -16,7 +15,7 @@ let filter = "All members";
     super();
 
     this.data = {
-      isAdmin: Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")).isAdmin : "null"
+      isAdmin: Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")).isAdmin : "null",
     }
   }
 
@@ -32,17 +31,24 @@ let filter = "All members";
     });
   
     EventBus.subscribe("refreshEvents", () => {
-      _this.fillTable();
+      this.getData();
     });
 
-    _this.fillTable()
+    this.getData();
+  }
+
+  getData() {
+    Store.getEvents()
+    .then (() => {
+      this.fillTable()
+    })
   }
 
   createTable(hours) {
     let table = document.createElement("table");
     let tableHeader = document.createElement("tr");
     let workingDays = Data.workingDays;
-    
+  
     tableHeader.insertAdjacentHTML("afterbegin", `
       <th>Time</th>
     `)
@@ -80,18 +86,21 @@ let filter = "All members";
     return table;
   }
 
-  fillTable() {
+  async fillTable() {
     const table = this.querySelector("table");
-    
-    let events = this.filterEvents();
+  
+    let events = await this.filterEvents();
+    console.log(events)
+  
     let tableClone = table.cloneNode(true);
     let tableCells = tableClone.querySelectorAll("tr td");
 
     if (!events.length) throw new Error("No events")
 
     events.forEach((event) => {
+  
       tableCells.forEach((cell) => {  
-        if (cell.dataset.day === event.day && cell.dataset.time === event.time) {
+        if (cell.dataset.day === event.data.day && cell.dataset.time === event.data.time) {
           let flagElement = document.createElement("div");
           let flagElementName = document.createElement("p");
           let flagElementButton = document.createElement("button");
@@ -101,11 +110,12 @@ let filter = "All members";
             flagElement.draggable = "true";
             flagElement.setAttribute("ondragstart", "onDragStart(event)");
           }
-          flagElement.dataset.day = event.day;
-          flagElement.dataset.time = event.time;
+          flagElement.dataset.day = event.data.day;
+          flagElement.dataset.time = event.data.time;
+          flagElement.dataset.id = event.id;
 
           flagElementName.classList.add("event-flag__name");
-          flagElementName.innerText = event.name;
+          flagElementName.innerText = event.data.name;
 
           flagElementButton.classList.add("event-flag__button");
           flagElementButton.innerText = "X";
@@ -133,7 +143,7 @@ let filter = "All members";
 
   showRemoveWindow(target) {
     let main = document.querySelector("#main");
-    let removeWindow = document.createElement("remove-event");
+    let removeWindow;
     let parent = {};
     
     parent.name = target
@@ -149,28 +159,28 @@ let filter = "All members";
       .parentElement
       .dataset.time;
 
-      removeWindow.classList.add("remove-event-wrapper");
-      removeWindow.dataset.name = parent.name;
-      removeWindow.dataset.day = parent.day;
-      removeWindow.dataset.time = parent.time;
+    parent.id = target
+      .parentElement
+      .dataset.id;
 
-      console.log(removeWindow)
+      removeWindow = new removeEvent(parent);
 
       main.insertAdjacentElement("afterbegin", removeWindow);
   }
 
-  filterEvents() {
+  async filterEvents() {
+
+    let events = Store.events;
     let value = filter === "Choose members" ? "" : filter;
     this.clearTable();
 
-    const cookies = Cookies.getCookie("calendar");
-    const events = cookies !== undefined ? JSON.parse(cookies) : [];
     let result = [];
 
     if (value !== "All members") {
       if (events && events !== "undefined") {
+    
         events.forEach((item) => {
-          if (item.participants.includes(value)) {
+          if (item.data.participants.includes(value)) {
             result.push(item);
           }
         });

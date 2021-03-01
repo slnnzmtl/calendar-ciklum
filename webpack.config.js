@@ -1,19 +1,25 @@
 
 var path = require('path');
+var babel = require('babel-polyfill');  
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   context: __dirname,
   mode: "development",
   devtool: "source-map",
-  entry: "./main.js",
+  // entry: "./main.js",
+  entry: {
+    app: ['babel-polyfill', "./main.js"]
+  },
   output: {
     path: path.join(__dirname, "/dist"),
     filename: "bundle.js"
   },
-  plugins: [new HtmlWebpackPlugin({
+  plugins: [
+    new HtmlWebpackPlugin({
     template: './index.html'
-  })],
+  }),
+],
   module: {
     rules: [
       {
@@ -54,13 +60,5 @@ module.exports = {
         ] 
       }
     ],
-  },
-  devServer: {
-    // contentBase: "dist",
-    // contentBase: [
-      // path.join(__dirname, 'dist'),
-      // path.join(__dirname, 'assets'),
-    // ],
-    // publicPath: "/"
-  },
+  }
 }

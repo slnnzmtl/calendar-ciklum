@@ -1,4 +1,3 @@
-import * as WcMixin from "../../utils/WcMixin.js";
 import { publish } from "../../utils/eventBus";
 import calendarHeader from "./calendarHeader.html";
 import { participants } from "../../assets/data";

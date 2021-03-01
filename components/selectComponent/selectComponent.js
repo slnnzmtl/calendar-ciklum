@@ -1,4 +1,3 @@
-import * as WcMixin from "../../utils/WcMixin.js";
 import "./selectComponent.scss";
 import {subscribe} from "../../utils/eventBus.js";
 import selectComponent from "./selectComponent.html";
