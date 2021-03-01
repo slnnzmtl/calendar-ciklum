@@ -4,7 +4,6 @@ import { participants } from "../../assets/data";
 import ComponentsHelper from "../../utils/ComponentsHelper";
 import newEventComponent from "../../components/newEvent/newEvent";
 import * as Cookies from "../../utils/cookies";
-import Store from "../../utils/store";
 
 import "./calendarHeader.scss";
 
@@ -13,7 +12,7 @@ export default class CalendarHeader extends HTMLElement {
     super();
 
     this.data = {
-        // participants: Store.users ? Store.users : [],
+        participants,
         isAdmin: Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")).isAdmin : "null"
     };
   }
@@ -37,16 +36,13 @@ export default class CalendarHeader extends HTMLElement {
 
     this.createButton.onclick = () => this.newEvent();
     this.logoutButton.onclick = () => this.logout();
-
-    this.fillParticipants(this.select, Store.users);
-  }
-
-  fillParticipants(select, data = []) {
-    ComponentsHelper.elementMultiplier("option", ["value"], select, data.map(item => item.data.name)); 
+    
+    ComponentsHelper.elementMultiplier("option", ["value"], this.select, this.data.participants.map(item => item.name)); 
 
     this.select.querySelectorAll("option").forEach(item => {
       item.innerText = item.value;
     })
+
   }
 
   newEvent() {

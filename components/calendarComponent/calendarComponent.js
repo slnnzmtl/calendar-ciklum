@@ -1,10 +1,9 @@
-import eventFlag from "../eventFlag/eventFlag";
-import removeEvent from "../removeEvent/removeEvent";
 import "./calendarComponent.scss";
 import * as Cookies from "../../utils/cookies";
 import * as Data from "../../assets/data";
 import "../../utils/draggable";
 import * as EventBus from "../../utils/eventBus";
+import removeEvent from "../removeEvent/removeEvent";
 import Store from "../../utils/store";
 
 const me = "calendar-component";
@@ -35,7 +34,7 @@ let filter = "All members";
       this.getData();
     });
 
-    this.fillTable();
+    this.getData();
   }
 
   getData() {
@@ -102,15 +101,6 @@ let filter = "All members";
   
       tableCells.forEach((cell) => {  
         if (cell.dataset.day === event.data.day && cell.dataset.time === event.data.time) {
-
-          // let flag = new eventFlag({
-          //   id: event.id,
-          //   name: event.data.name,
-          //   day: event.data.day,
-          //   time: event.data.time
-          // });
-
-          // cell.appendChild(flag);
           let flagElement = document.createElement("div");
           let flagElementName = document.createElement("p");
           let flagElementButton = document.createElement("button");

@@ -1,6 +1,6 @@
 import * as Cookies from "../../utils/cookies.js";
 import * as EventBus from "../../utils/eventBus";
-import { workingDays, workingHours } from "../../assets/data";
+import { participants, workingDays, workingHours } from "../../assets/data";
 import ComponentsHelper from "../../utils/ComponentsHelper";
 import newEvent from "./newEvent.html";
 import selectComponent from "../selectComponent/selectComponent";
@@ -14,7 +14,7 @@ export default class NewEvent extends HTMLElement {
     super();
 
         this.data = {
-            participants: Store.users,
+            participants,
             days: workingDays,
             hours: workingHours
         };
@@ -35,7 +35,7 @@ export default class NewEvent extends HTMLElement {
     this.buttonSubmit.onclick = () => this.createEvent();
     this.buttonCancel.onclick = () => this.closeTab();
 
-    let multiSelect = new selectComponent(this.data.participants.map(item => item.data));
+    let multiSelect = new selectComponent(this.data.participants);
     this.participants.appendChild(multiSelect);
     multiSelect.classList.add("new-event__input");
 
@@ -64,20 +64,26 @@ export default class NewEvent extends HTMLElement {
       // const cookies = Cookies.getCookie("calendar");
       // const events = cookies ? JSON.parse(cookies) : [];
 
-      if (!this.checkIfExist(Store.events, object)) {
+      // if (!this.checkIfExist(events, object)) {
         // if (events && events !== "undefined") {    
         Store.pushEvent(object);
-  
+        
+        Store.getEvents()
+        .then(() => {
+          console.log(Store.events);
+        })
+
         object = {};
         this.closeTab();
         EventBus.publish("refreshEvents");
-      }
+      // }
     }
   }
 
   checkFields(data) {
     this.clearErrors();
     let error = 0;
+    console.log(data)
     if (data.name === "") {
       this.showError("Name cannot be empty.");
       error += 1;
@@ -94,11 +100,10 @@ export default class NewEvent extends HTMLElement {
   }
 
   checkIfExist(data, object) {
-    
     let result = false;
     data.forEach((item) => {
       if (item) {
-        if (item.data.day === object.day && item.data.time === object.time) {
+        if (item.day === object.day && item.time === object.time) {
           result = true;
           this.showError("This time is already taken.");
         }

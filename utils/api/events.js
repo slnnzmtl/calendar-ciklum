@@ -1,6 +1,6 @@
 import API from "./index";
 
-class EventsAPI extends API {
+const eventsApi = new class EventsAPI extends API {
     constructor() {
         super();
         
@@ -35,4 +35,4 @@ class EventsAPI extends API {
     }
 } 
 
-export default new EventsAPI();
+export default eventsApi;
