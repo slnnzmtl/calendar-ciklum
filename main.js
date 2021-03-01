@@ -8,6 +8,7 @@ import { subscribe } from "./utils/eventBus";
 import * as Cookies from "./utils/cookies";
 import SelectComponent from './components/selectComponent/selectComponent';
 import calendarComponent from './components/calendarComponent/calendarComponent';
+import removeEvent from "./components/removeEvent/removeEvent";
 
 import '/styles/main.scss';
 
@@ -18,6 +19,7 @@ customElements.define('calendar-header', calendarHeader);
 customElements.define('new-event', newEvent);
 customElements.define('select-multiply', SelectComponent);
 customElements.define('calendar-component', calendarComponent);
+customElements.define('remove-event', removeEvent);
 
 subscribe("logout", () => {
     render();

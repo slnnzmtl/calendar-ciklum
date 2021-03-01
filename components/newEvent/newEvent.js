@@ -1,10 +1,10 @@
-import * as WcMixin from "../../utils/WcMixin.js";
 import * as Cookies from "../../utils/cookies.js";
 import * as EventBus from "../../utils/eventBus";
 import { participants, workingDays, workingHours } from "../../assets/data";
 import ComponentsHelper from "../../utils/ComponentsHelper";
 import newEvent from "./newEvent.html";
 import selectComponent from "../selectComponent/selectComponent";
+import Store from "../../utils/store";
 
 import "./newEvent.scss";
 
@@ -61,22 +61,22 @@ export default class NewEvent extends HTMLElement {
 
 
     if (this.checkFields(object)) {
-      const cookies = Cookies.getCookie("calendar");
-      const events = cookies ? JSON.parse(cookies) : [];
+      // const cookies = Cookies.getCookie("calendar");
+      // const events = cookies ? JSON.parse(cookies) : [];
 
-      if (!this.checkIfExist(events, object)) {
-        if (events && events !== "undefined") {
-          events.push(object);
-          Cookies.setCookie("calendar", JSON.stringify(events));
-        } else {
-          events[0] = object;
-          Cookies.setCookie("calendar", JSON.stringify(events));
-        }
+      // if (!this.checkIfExist(events, object)) {
+        // if (events && events !== "undefined") {    
+        Store.pushEvent(object);
+        
+        Store.getEvents()
+        .then(() => {
+          console.log(Store.events);
+        })
 
         object = {};
         this.closeTab();
         EventBus.publish("refreshEvents");
-      }
+      // }
     }
   }
 
@@ -132,36 +132,3 @@ export default class NewEvent extends HTMLElement {
     EventBus.publish("resetForm");
   }
 }
-
-
-//   formSetData() {
-//     const participants = document.createElement("select-multiply");
-//     participants.className = "new-event__input select-multiply";
-//     participants.id = "select-participants";
-//     participants
-//       .appendChild(
-//         this.getParticipants(Data.participants),
-//       );
-//     this.participantsLabel
-//       .appendChild(participants);
-
-    
-  // }
-
-//   getParticipants(array) {
-//     const template = document.createElement("div");
-//     template.dataset.name = "template";
-
-//     array.forEach((item) => {
-//       let slot = document.createElement("slot");
-//       slot.dataset.name = item;
-//       slot.innerText = item;
-
-//       template.appendChild(slot);
-//     });
-
-//     return template;
-//   }
-
-
-// });

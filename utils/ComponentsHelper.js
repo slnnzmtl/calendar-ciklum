@@ -1,8 +1,6 @@
 export default {
     
     elementMultiplier(type, attributes, selectElement, data) {
-        console.log(data)
-    
         data.forEach(item => {
             let optionElement = document.createElement(type);
             attributes.forEach(element => {
