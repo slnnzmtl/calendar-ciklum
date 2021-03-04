@@ -1,11 +1,26 @@
 import Events from "./api/events";
 import Users from "./api/users";
+import * as Cookies  from "../utils/cookies";
 
 import { publish } from "./eventBus";
 
 class Store {
     constructor() {
-        this.state = {};
+        this.state = {
+            currentUser: {},
+            // isAdmin: Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")).isAdmin : 'false'
+        };
+
+        this.getCurrentUser();
+    }
+
+    getCurrentUser() {
+        this.state.currentUser = Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")) : {};
+    }
+
+    clearCurrentUser() {
+        Cookies.deleteCookie("currentUser");
+        this.state.isAdmin = false;
     }
 
     async getEvents() {
@@ -78,6 +93,14 @@ class Store {
             return this.state.users;
         } else {
             return new Error("No users in store");
+        }
+    }
+
+    get isAdmin() {
+        if (this.state.currentUser) {
+            return this.state.currentUser.isAdmin;
+        } else {
+            return new Error("No info in store");
         }
     }
 }

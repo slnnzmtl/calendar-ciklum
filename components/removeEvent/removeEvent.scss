@@ -55,6 +55,10 @@
 
         &__title {
             word-wrap: break-word;
+
+            span {
+                font-weight: bold;
+            }
         }
 
         &__buttons {

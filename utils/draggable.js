@@ -34,19 +34,16 @@ function putElement(element, dropzone) {
   const drop = {};
   const events = Store.events;
 
-  // element.day = element.dataset.day;
-  // element.time = element.dataset.time;
-
   drop.day = dropzone.dataset.day;
   drop.time = dropzone.dataset.time;
 
   if (dropzoneCheck(events, dropzone)) {
     dropzone.appendChild(element);
 
-    element.dataset.day = drop.day;
-    element.dataset.time = drop.time;
+    element.data.day = drop.day;
+    element.data.time = drop.time;
 
-    Store.updatePosition(element.dataset.id, drop);
+    Store.updatePosition(element.data.id, drop);
   }
 }
 

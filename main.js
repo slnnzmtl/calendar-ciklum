@@ -31,7 +31,6 @@ Store.getUsers()
     })
 })
 
-
 subscribe("logout", () => {
     render();
 });
@@ -47,6 +46,7 @@ function render() {
     if (!currentUser) {
         main.innerHTML = new authComponent().outerHTML;
     } else {
+        Store.getCurrentUser();
         main.innerHTML = new calendarComponent().outerHTML;
         main.appendChild(new calendarHeader());
     }    

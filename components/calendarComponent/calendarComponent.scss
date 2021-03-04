@@ -35,65 +35,6 @@ table {
     padding: 0;
     margin: 0;
     font-size: 12px!important;
-  
-    .event-flag {
-      color: #000;
-      background-color: rgba(162, 207, 170, 0.6);
-      cursor: move;
-      cursor: grab;
-      cursor: -webkit-grab;
-  
-      height: 100%;
-      width: 100%;
-      -webkit-box-sizing: border-box;
-              box-sizing: border-box;
-      display:-webkit-box;
-      display:-ms-flexbox;
-      display:flex;
-      -webkit-box-pack: justify;
-          -ms-flex-pack: justify;
-              justify-content: space-between;
-      -webkit-box-align: center;
-          -ms-flex-align: center;
-              align-items: center;
-      padding: 10px;
-
-      @media (max-width: 800px) {
-        padding: 5px;
-      }
-
-      &:hover {
-        background-color: #9ad4ae;
-      }
-  
-      &__name {
-        word-wrap: break-word;
-        width: 90%;
-      }
-  
-      &:active {
-        cursor: grabbing;
-        cursor: -webkit-grabbing;
-      }
-  
-      &__button {
-        background: none;
-        border: none;
-        outline: none;
-        cursor: pointer;
-        transition: ease 0.1s;
-        &:hover {
-          font-weight: bolder;
-          font-size: 18px;
-        }
-        @media (max-width:800px) {
-          font-size: 10px;
-          margin: 0px;
-          padding: 0px;
-          padding-left: 2px;
-        }
-      }
-    }
   }
 
   td, th {
@@ -103,7 +44,7 @@ table {
       font-size: 12px;
     }
     @media (max-width: 400px) {
-      font-size: 10px;
+      font-size: 8px;
     }
   }
 

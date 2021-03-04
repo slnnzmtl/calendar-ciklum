@@ -14,7 +14,7 @@ export default class CalendarHeader extends HTMLElement {
 
     this.data = {
         // participants: Store.users ? Store.users : [],
-        isAdmin: Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")).isAdmin : "null"
+        // isAdmin: Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")).isAdmin : "null"
     };
   }
 
@@ -27,7 +27,7 @@ export default class CalendarHeader extends HTMLElement {
     this.createButton = this.querySelector(".calendar-header__button");
     this.logoutButton = this.querySelector(".calendar-header__logout");
 
-    this.createButton.style.display = this.data.isAdmin ? "block" : "none";
+    this.createButton.style.display = Store.isAdmin ? "block" : "none";
 
     this.select.insertAdjacentHTML("afterbegin", `
       <option value="All members">All members</option>
@@ -55,7 +55,7 @@ export default class CalendarHeader extends HTMLElement {
   }
 
   logout() {
-    Cookies.deleteCookie("currentUser");
+    Store.clearCurrentUser();
     publish("logout");
   }
 }
