@@ -1,19 +1,20 @@
-import API from "./index";
+import ServerApi from "./index";
 
-class EventsAPI extends API {
+class UsersApi extends ServerApi {
     constructor() {
         super();
-        
-        this.entity = "events";
+
+        this.entity = "users";
     }
 
     async get() {
         let response = await super.get(this.entity);
         let data = await response.json();
+        console.log(data)
 
         if (data) {
             data.forEach(item => {
-                item.data = JSON.parse(item.data);
+                item.data = item.data ? JSON.parse(item.data) : "";
             });
 
             return data;
@@ -33,6 +34,6 @@ class EventsAPI extends API {
     async put(id, data) {
         return await super.put(this.entity, id, data);
     }
-} 
+}
 
-export default new EventsAPI();
+export default new UsersApi();

@@ -1,7 +1,9 @@
 import Events from "./api/events";
+import Users from "./api/users";
+
 import { publish } from "./eventBus";
 
-const store = new class Store {
+class Store {
     constructor() {
         this.state = {};
     }
@@ -47,6 +49,22 @@ const store = new class Store {
         });
     }
 
+    async getUsers() {
+        let response = await Users.get();
+        this.state.users = response;
+    }
+
+    pushUser(data) {
+        Events.post(data)
+        .then(() => {
+            this.state.users.push(data);
+            publish("refreshUsers");
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }
+
     get events() {
         if (this.state.events) {
             return this.state.events;
@@ -54,6 +72,14 @@ const store = new class Store {
             return new Error("No events in store");
         }
     }
+
+    get users() {
+        if (this.state.users) {
+            return this.state.users;
+        } else {
+            return new Error("No users in store");
+        }
+    }
 }
 
-export default store;
+export default new Store();
