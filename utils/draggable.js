@@ -34,28 +34,15 @@ function putElement(element, dropzone) {
   const drop = {};
   const { events } = Store;
 
-<<<<<<< Updated upstream
-  // element.day = element.dataset.day;
-  // element.time = element.dataset.time;
-
-  drop.day = dropzone.dataset.day;
-  drop.time = dropzone.dataset.time;
-=======
   drop.day = dropzone.data.day;
   drop.time = dropzone.data.time;
->>>>>>> Stashed changes
 
   if (dropzoneCheck(events, dropzone)) {
     dropzone.appendChild(element);
 
-<<<<<<< Updated upstream
-    element.dataset.day = drop.day;
-    element.dataset.time = drop.time;
-=======
     console.log(drop)
     element.data.day = drop.day;
     element.data.time = drop.time;
->>>>>>> Stashed changes
 
     Store.updatePosition(element.dataset.id, drop);
   }
