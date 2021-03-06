@@ -9,14 +9,6 @@ import './calendarHeader.scss';
 export default class CalendarHeader extends HTMLElement {
   constructor() {
     super();
-<<<<<<< Updated upstream
-
-    this.data = {
-        // participants: Store.users ? Store.users : [],
-        isAdmin: Cookies.getCookie("currentUser") ? JSON.parse(Cookies.getCookie("currentUser")).isAdmin : "null"
-    };
-=======
->>>>>>> Stashed changes
   }
 
   connectedCallback() {
@@ -27,11 +19,7 @@ export default class CalendarHeader extends HTMLElement {
     this.createButton = this.querySelector('.calendar-header__button');
     this.logoutButton = this.querySelector('.calendar-header__logout');
 
-<<<<<<< Updated upstream
-    this.createButton.style.display = this.data.isAdmin ? "block" : "none";
-=======
     this.createButton.style.display = Store.isAdmin ? 'block' : 'none';
->>>>>>> Stashed changes
 
     this.select.insertAdjacentHTML('afterbegin', `
       <option value="All members">All members</option>
@@ -58,12 +46,7 @@ export default class CalendarHeader extends HTMLElement {
   }
 
   logout() {
-<<<<<<< Updated upstream
-    Cookies.deleteCookie("currentUser");
-    publish("logout");
-=======
     Store.clearCurrentUser();
     publish('logout');
->>>>>>> Stashed changes
   }
 }
