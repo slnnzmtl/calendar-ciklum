@@ -1,10 +1,3 @@
-/*
-* Prefixed by https://autoprefixer.github.io
-* PostCSS: v7.0.29,
-* Autoprefixer: v9.7.6
-* Browsers: last 4 version
-*/
-
 @import '/styles/variables.scss';
 
 .new-event-container {
@@ -33,8 +26,8 @@
   .error-message {
     background-color: rgba(255, 93, 93, 0.5);
     color: #fff;
-    box-shadow: $shadow1;
-    // border: 2px solid rgb(255, 93, 93);
+    -webkit-box-shadow: $shadow1;
+            box-shadow: $shadow1;
     border-radius: 3px;
     
     width: 500px;
@@ -81,8 +74,13 @@
       display: flex;
 
       @media (max-width: 500px) {
-        flex-direction: column;
-        align-items: flex-start;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-box-align: start;
+            -ms-flex-align: start;
+                align-items: flex-start;
         margin-bottom: 10px;    
       }
       -webkit-box-pack: justify;
@@ -149,6 +147,8 @@
       cursor: pointer;
       -webkit-transition: ease 0.1s;
       -o-transition: ease 0.1s;
+      -webkit-transition: ease 0.5s;
+      -o-transition: ease 0.5s;
       transition: ease 0.5s;
       box-shadow: $shadow1;
       -webkit-box-shadow:  $shadow1;

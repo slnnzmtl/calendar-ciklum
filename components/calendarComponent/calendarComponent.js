@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import eventFlag from "../eventFlag/eventFlag";
 import removeEvent from "../removeEvent/removeEvent";
 import "./calendarComponent.scss";
@@ -6,6 +7,14 @@ import * as Data from "../../assets/data";
 import "../../utils/draggable";
 import * as EventBus from "../../utils/eventBus";
 import Store from "../../utils/store";
+=======
+import './calendarComponent.scss';
+import * as Data from '../../assets/data';
+import '../../utils/draggable';
+import * as EventBus from '../../utils/eventBus';
+import Store from '../../utils/store';
+import TableColumn from '../tableColumn/tableColumn';
+>>>>>>> Stashed changes
 
 const me = "calendar-component";
 let filter = "All members";
@@ -21,6 +30,10 @@ let filter = "All members";
   }
 
   connectedCallback() {
+<<<<<<< Updated upstream
+=======
+    this.classList.add('calendar');
+>>>>>>> Stashed changes
 
     this.appendChild(this.createTable(Data.workingHours));
     const _this = this; 
@@ -28,16 +41,27 @@ let filter = "All members";
     
     EventBus.subscribe("participantFilterChanged", value => {
       filter = value;
+<<<<<<< Updated upstream
       _this.fillTable();
     });
   
     EventBus.subscribe("refreshEvents", () => {
       this.getData();
+=======
+      this.clearTable();
+      this.insertData();
     });
 
-    this.fillTable();
+    EventBus.subscribe('refreshEvents', () => {
+      this.clearTable();
+      this.insertData();
+>>>>>>> Stashed changes
+    });
+
+    this.insertData();
   }
 
+<<<<<<< Updated upstream
   getData() {
     Store.getEvents()
     .then (() => {
@@ -135,9 +159,62 @@ let filter = "All members";
 
           cell.insertAdjacentElement('afterbegin', flagElement);
         }
-      });
-    });
+=======
+  clearTable() {
+    const container = this.querySelector('.table-container');
+    if (container) container.remove();
+  }
 
+  insertData() {
+    this.appendChild(
+      this.createTable(Data.workingDays, Data.workingHours)
+    );
+  }
+
+  createTable(days, hours) {
+    const table = document.createElement('div');
+    let rowHeader = document.createElement("div");
+    let header = document.createElement("div");
+
+    table.classList.add('table-container');
+
+    header.classList.add("table-cell");
+    header.classList.add("table-header");
+
+    header.textContent = "Time";
+    rowHeader.appendChild(header);
+    rowHeader.classList.add("table-column");
+    rowHeader.classList.add("row-header");
+
+    hours.forEach(item => {
+      let elem = document.createElement("div");
+          elem.classList.add("table-cell");
+          elem.classList.add("table-header");
+          elem.textContent = `${item}:00`;
+          rowHeader.appendChild(elem);
+    })
+
+    table.appendChild(rowHeader);
+
+    this.filterEvents()
+      .then((res) => {
+        days.forEach((day) => {
+          const filtered = res.filter(
+            event => event.data.day === day
+          );
+
+          table.appendChild(
+            new TableColumn(
+              hours,
+              day,
+              filtered.length > 0 ? filtered : null,
+            ),
+          );
+        });        
+>>>>>>> Stashed changes
+      });
+
+<<<<<<< Updated upstream
     table.replaceWith(tableClone);
     this.removeButtonsAddSettings();
     return table;
@@ -192,12 +269,30 @@ let filter = "All members";
         events.forEach((item) => {
           if (item.data.participants.includes(value)) {
             result.push(item);
+=======
+    return table;
+  }
+
+  async filterEvents() {
+    let result = [];
+    await Store.getEvents()
+      .then(async () => {
+        const { events } = Store;
+        const value = filter === 'Choose members' ? '' : filter;
+
+        if (value !== 'All members') {
+          if (events && events !== 'undefined') {
+            events.forEach((item) => {
+              if (item.data.participants.includes(value)) {
+                result.push(item);
+              }
+            });
+>>>>>>> Stashed changes
           }
-        });
-      }
-    } else {
-      result = events;
-    }
+        } else {
+          result = events;
+        }
+      });
     return result;
   }
 

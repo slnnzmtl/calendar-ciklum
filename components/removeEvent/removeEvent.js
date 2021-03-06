@@ -8,8 +8,10 @@ import './removeEvent.scss';
 
 export default class RemoveEvent extends HTMLElement {
 
-  constructor(options) {
+  constructor(options, parent) {
     super();
+
+    this.parent = parent;
 
     this.classList.add("remove-event-wrapper");
 
@@ -36,29 +38,11 @@ export default class RemoveEvent extends HTMLElement {
     
     Store.deleteEvent(id)
     .then(() => {
-      console.log('deleted');
-    })
-    
-    // const events = await Store.getEvents(); 
-    
-    // let day = this.data.day;
-    // let time = this.data.time;
-
-    // events.forEach((item, index) => {
-    //   if (item.day === day && item.time === time) {
-    //     events.splice(index, 1);
-    //   }
-    // });
-
-    // if (events.length > 0) {
-    //   Cookies.setCookie('calendar', JSON.stringify(events));
-    // } else {
-    //   Cookies.deleteCookie('calendar');
-    // }
-
-    this.closeTab();
-    EventBus.publish("refreshEvents");    
+      this.parent.remove();
+      this.closeTab();
+    });
   }
+
   closeTab() {
     this.remove();
   }
