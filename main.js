@@ -5,6 +5,8 @@ import SelectComponent from './components/selectComponent/selectComponent';
 import calendarComponent from './components/calendarComponent/calendarComponent';
 import removeEvent from "./components/removeEvent/removeEvent";
 import eventFlag from "./components/eventFlag/eventFlag";
+import TableCell from "./components/tableCell/tableCell";
+import TableColumn from "./components/tableColumn/tableColumn";
 
 import { subscribe } from "./utils/eventBus";
 import * as Cookies from "./utils/cookies";
@@ -22,6 +24,8 @@ customElements.define('select-multiply', SelectComponent);
 customElements.define('calendar-component', calendarComponent);
 customElements.define('remove-event', removeEvent);
 customElements.define('event-flag', eventFlag);
+customElements.define('table-cell', TableCell);
+customElements.define('table-column', TableColumn);
 
 Store.getUsers()
 .then(() => {

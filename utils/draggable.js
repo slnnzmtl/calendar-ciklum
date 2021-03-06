@@ -32,38 +32,47 @@ export function onDrop(event) {
 function putElement(element, dropzone) {
   
   const drop = {};
-  const events = Store.events;
+  const { events } = Store;
 
+<<<<<<< Updated upstream
   // element.day = element.dataset.day;
   // element.time = element.dataset.time;
 
   drop.day = dropzone.dataset.day;
   drop.time = dropzone.dataset.time;
+=======
+  drop.day = dropzone.data.day;
+  drop.time = dropzone.data.time;
+>>>>>>> Stashed changes
 
   if (dropzoneCheck(events, dropzone)) {
     dropzone.appendChild(element);
 
+<<<<<<< Updated upstream
     element.dataset.day = drop.day;
     element.dataset.time = drop.time;
+=======
+    console.log(drop)
+    element.data.day = drop.day;
+    element.data.time = drop.time;
+>>>>>>> Stashed changes
 
     Store.updatePosition(element.dataset.id, drop);
   }
 }
 
 function dropzoneCheck(events, drop) {
-  let result = 0;
-  if (drop.tagName === "TD") { 
+  let result = true;
+  if (drop.tagName === "TABLE-CELL") { 
+    
     events.forEach(item => {
-      if (item.data.day === drop.dataset.day && item.data.time === drop.dataset.time) {
-        result += 1;
+
+      if (item.data.day === drop.data.day &&
+          item.data.time === drop.data.time) {
+        result = false;
       }
     });
-    
-    if (result > 0) {
-      return false;
-    } else {
-      return true;
-    }
+    return result;
   }
 }
 

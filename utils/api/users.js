@@ -10,7 +10,6 @@ class UsersApi extends ServerApi {
     async get() {
         let response = await super.get(this.entity);
         let data = await response.json();
-        console.log(data)
 
         if (data) {
             data.forEach(item => {

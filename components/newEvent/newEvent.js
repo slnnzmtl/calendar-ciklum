@@ -56,18 +56,15 @@ export default class NewEvent extends HTMLElement {
     let object = {};
     object.name = this.name.value;
     object.day = this.days.value;
-    object.time = this.time.value.split(":")[0];
+    object.time = + this.time.value.split(":")[0];
     object.participants = this.querySelector(".select-multiply__value").innerText.split(",");
 
 
     if (this.checkFields(object)) {
-      // const cookies = Cookies.getCookie("calendar");
-      // const events = cookies ? JSON.parse(cookies) : [];
-
       if (!this.checkIfExist(Store.events, object)) {
-        // if (events && events !== "undefined") {    
+
         Store.pushEvent(object);
-  
+
         object = {};
         this.closeTab();
         EventBus.publish("refreshEvents");
