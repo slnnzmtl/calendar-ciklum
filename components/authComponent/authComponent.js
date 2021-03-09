@@ -20,7 +20,6 @@ export default class Auth extends HTMLElement {
 
     connectedCallback() {
         this.data.participants = Store.users;
-        this.fillUsers(this.select, this.data.participants)
 
         this.appendChild(ComponentsHelper.parseElement(authComponent));
         this.classList.add("auth-wrapper");
@@ -29,6 +28,8 @@ export default class Auth extends HTMLElement {
         this.button = this.querySelector(".auth__button");
 
         this.button.onclick = () => this.confirm(this.select.value);
+
+        this.fillUsers(this.select, this.data.participants)
     }
 
     fillUsers(select, users) {
