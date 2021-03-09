@@ -27,13 +27,10 @@ customElements.define('event-flag', eventFlag);
 customElements.define('table-cell', TableCell);
 customElements.define('table-column', TableColumn);
 
-Store.getUsers()
-.then(() => {
-    Store.getEvents()
+Store.getData()
     .then(() => {
         render();
     })
-})
 
 
 subscribe("logout", () => {

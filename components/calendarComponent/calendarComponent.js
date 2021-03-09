@@ -1,9 +1,10 @@
 import './calendarComponent.scss';
-import * as Data from '../../assets/data';
+import * as Data from '../../assets/data.js';
 import '../../utils/draggable';
 import * as EventBus from '../../utils/eventBus';
 import Store from '../../utils/store';
 import TableColumn from '../tableColumn/tableColumn';
+import * as Cookies from "../../utils/cookies";
 
 const me = "calendar-component";
 let filter = "All members";
@@ -19,10 +20,7 @@ let filter = "All members";
   }
 
   connectedCallback() {
-    this.classList.add('calendar');
-
-    this.appendChild(this.createTable(Data.workingHours));
-    const _this = this; 
+    
     this.classList.add("calendar");
     
     EventBus.subscribe("participantFilterChanged", value => {
