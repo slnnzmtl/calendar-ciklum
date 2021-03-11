@@ -1,12 +1,18 @@
 import Events from "./api/events";
 import Users from "./api/users";
 import * as Cookies from "./cookies";
+import { subscribe } from "./eventBus"
 
 import { publish } from "./eventBus";
+
 
 class Store {
     constructor() {
         this.state = {};
+
+        subscribe("login", () => {
+            this.getCurrentUser();
+        });
     }
 
     async getEvents() {
@@ -71,7 +77,9 @@ class Store {
     }
 
     async getCurrentUser() {
-        this.state.currentUser = JSON.parse(Cookies.getCookie("currentUser"));
+        let cookies = Cookies.getCookie("currentUser");
+        this.state.currentUser = await cookies ? JSON.parse(cookies) : {};
+        console.log(this.state.currentUser)
     }
 
     getData() {
@@ -112,7 +120,7 @@ class Store {
         if (this.state.currentUser) {
             return this.state.currentUser.isAdmin;
         }
-    }
+    }   
 }
 
 export default new Store();
