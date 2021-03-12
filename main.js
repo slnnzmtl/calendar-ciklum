@@ -43,9 +43,8 @@ subscribe("login", () => {
 
 
 function render() {
-    let currentUser = Cookies.getCookie("currentUser");
 
-    if (!currentUser) {
+    if (!Store.isAdmin) {
         main.innerHTML = new authComponent().outerHTML;
     } else {
         main.innerHTML = new calendarComponent().outerHTML;

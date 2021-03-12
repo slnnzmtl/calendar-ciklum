@@ -44,6 +44,7 @@ class Store {
     }
 
     updatePosition(id, drop) {
+
         this.state.events.forEach((item) => {
             if (item.id === id) {
                 item.data.day = drop.day;

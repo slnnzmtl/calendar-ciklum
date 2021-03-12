@@ -24,13 +24,13 @@ export function onDrop(event) {
     .clearData();
 
   const draggableElement = document.getElementById(id);
-
   const dropzone = event.target;
+
   putElement(draggableElement, dropzone);
 }
 
 function putElement(element, dropzone) {
-  
+
   const drop = {};
   const { events } = Store;
 
@@ -40,11 +40,10 @@ function putElement(element, dropzone) {
   if (dropzoneCheck(events, dropzone)) {
     dropzone.appendChild(element);
 
-    console.log(drop)
     element.data.day = drop.day;
     element.data.time = drop.time;
 
-    Store.updatePosition(element.dataset.id, drop);
+    Store.updatePosition(element.data.id, drop);
   }
 }
 
